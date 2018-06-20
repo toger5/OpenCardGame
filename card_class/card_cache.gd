@@ -12,3 +12,15 @@ func card(card_file_name):
 
 func card_by_id(id):
 	print("not yet implemented")
+	
+func get_all_card_names():
+	var d = Directory.new()
+	var card_names = []
+	if d.open("res://cards/") == OK:
+		d.list_dir_begin()
+		var dir_el_name = d.get_next()
+		while dir_el_name != "":
+			if dir_el_name.ends_with(".gd"):
+				card_names.append(dir_el_name.split(".")[0])
+			dir_el_name = d.get_next()
+	return card_names

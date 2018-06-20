@@ -4,7 +4,6 @@ var card_scn = preload("res://card_class/card.tscn")
 
 var card_size = Vector2()# setget card_size_checked
 var card_viewports = {}
-
 func add_card_vp(card):
 	var render_vp = Viewport.new()
 	var card_node = card_scn.instance()

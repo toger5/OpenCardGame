@@ -1,5 +1,6 @@
 extends "res://card_class/card_creature.gd"
 
 func _init():
-	name = "Its Flo"
-	text = "nothing to worry becuase i think i can carry"
+	name = "Da Stadt die freude macht"
+	text = "spilen dann sind die mosnter gluecklicj und machen mehr damage und das is echt wichtig!!"
+	type = CardType.INSTANT
