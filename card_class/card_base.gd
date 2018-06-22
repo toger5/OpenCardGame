@@ -1,7 +1,7 @@
 extends Object
 
-enum CardType {INSTANT, CREATURE}
-enum ManaType {RED, BLUE}
+enum CardType {INSTANT, SORCERY, CREATURE, PLANESWALKER, LAND, ENCHANTMENT, ARTIFACT}
+enum ManaType {WHITE, BLUE, BLACK, RED, GREEN, COLORLESS}#this order should always be used ex. in mana costs (its the original mtg order)
 enum LocationType {DECK, HAND, GRAVEYARD, BATTLEFIELD}
 
 #props
@@ -19,13 +19,13 @@ var casted = false
 var texture_node
 var holder_node setget holder_node_setget
 
+func _init():
+	var im_p = get_script().resource_path.replace(".gd",".png")
+	img_path = im_p
 #events
 func _casted():
 	casted = true
 	print("card got casted")
-func _init():
-	var im_p = get_script().resource_path.replace(".gd",".png")
-	img_path = im_p
 func _action_on_card(card):
 	print("action on card: "+ str(card.name))
 	pass
