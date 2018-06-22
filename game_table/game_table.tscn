@@ -2,7 +2,7 @@
 
 [ext_resource path="res://theme/table.theme" type="Theme" id=1]
 [ext_resource path="res://game_table/game_table.gd" type="Script" id=2]
-[ext_resource path="res://game_table/table_side.tscn" type="PackedScene" id=3]
+[ext_resource path="res://game_table/player_side.tscn" type="PackedScene" id=3]
 
 [node name="Control" type="Control" index="0"]
 anchor_left = 0.0
@@ -39,21 +39,30 @@ script = ExtResource( 2 )
 [node name="opp" parent="table" index="0" instance=ExtResource( 3 )]
 editor/display_folded = true
 margin_top = 0.0
-margin_bottom = 536.0
+margin_right = 1024.0
+margin_bottom = 296.0
 
 [node name="left_area" parent="table/opp" index="0"]
-margin_bottom = 536.0
+margin_right = 203.0
+margin_bottom = 296.0
 
 [node name="right_area" parent="table/opp" index="1"]
-margin_bottom = 536.0
+margin_left = 211.0
+margin_right = 1024.0
+margin_bottom = 296.0
+
+[node name="hand" parent="table/opp/right_area" index="0"]
+margin_right = 813.0
 
 [node name="bf" parent="table/opp/right_area" index="1"]
-margin_bottom = 536.0
+margin_right = 813.0
+margin_bottom = 296.0
 
 [node name="player" parent="table" index="1" instance=ExtResource( 3 )]
 editor/display_folded = true
-margin_top = 544.0
-margin_bottom = 1080.0
+margin_top = 304.0
+margin_right = 1024.0
+margin_bottom = 600.0
 is_player = true
 
 [node name="TextureRect" type="TextureRect" parent="." index="1"]

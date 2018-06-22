@@ -1,5 +1,10 @@
 extends Control
 
+enum TableLocation {BF, HAND, GRAVEYARD, DECK, OPPONENT_HAND, OPPONENT_BF}
+
+onready var player = $player
+onready var opponent = $opp
+
 onready var opp_hand_control = $opp/right_area/hand
 onready var opp_bf_control = $opp/right_area/bf
 onready var hand_control = $player/right_area/hand
@@ -18,14 +23,8 @@ var MIN_HAND_HIGHT = 240
 var BF_CARD_HEIGHT = 350
 var DRAG_SIZE_HIGHT = 240
 
-var hand = [card_cache.card("a"),
-		card_cache.card("b"),
-		card_cache.card("flo"),
-		card_cache.card("flosC"),
-		card_cache.card("flo"),
-		card_cache.card("flosC")]
-
-enum TableLocation {BF, HAND, GRAVEYARD, DECK, OPPONENT_HAND, OPPONENT_BF}
+var hand = []
+var mana_cards = []
 
 var dragged_card = null
 var drag_offset = Vector2()
@@ -40,6 +39,13 @@ func _ready():
 	card_preview_tr.rect_size.y = card_preview_tr.rect_size.x / card_renderer.card_size.aspect()
 
 func setup_game():
+	hand = [card_cache.card("a"),
+		card_cache.card("b"),
+		card_cache.card("mana_red"),
+		card_cache.card("mana_blue"),
+		card_cache.card("mana_blue"),
+		card_cache.card("flo"),
+		card_cache.card("flosC")]
 	for card in hand:
 		add_card_to_hand(card)
 
@@ -54,6 +60,8 @@ func add_card_to_hand(card, initial_rect = null):
 	hand_card_h_box.add_child(card_holder)
 	hand_card_h_box.move_child(card_holder, 0)
 	card.location = card.LocationType.HAND
+	if not hand.has(card):
+		hand.append(card)
 	yield(hand_card_h_box, "sort_children")
 	if initial_rect:
 		card.texture_node.rect_global_position = initial_rect.position
@@ -69,11 +77,21 @@ func move_card_to(card, table_location):
 	match table_location:
 		TableLocation.BF:
 			h_box = bf_card_h_box
-			card.location = card.LocationType.BATTLEFIELD
-			card._casted()
+			if card.location == card.LocationType.HAND:
+				card._casted()
+				if card.type == card.CardType.MANA:
+					h_box = null
+					hand_card_h_box.remove_child(card.holder_node)
+					mana_cards.append(card)
+					card.location = card.LocationType.MANA
+				elif card.type == card.CardType.CREATURE:
+					card.location = card.LocationType.BATTLEFIELD
+				
 		TableLocation.HAND:
-			h_box = hand_card_h_box
-			card.location = card.LocationType.HAND
+			#sollte eigentlich nicht gehen... vielleicht sollte player gechoosed werden...
+#			h_box = hand_card_h_box
+#			card.location = card.LocationType.HAND
+			pass
 		TableLocation.OPPONENT_BF:
 			var target_card = card_under_mouse()
 			if target_card and card.casted:
@@ -124,31 +142,34 @@ func mouse_exited_card_tex(card, force = false):
 	var t_ease = Tween.EASE_OUT
 	var d = 0.6
 	var ct = card.texture_node
-	VisualServer.canvas_item_set_z_index(ct.get_canvas_item(),0)
+	VisualServer.canvas_item_set_z_index(ct.get_canvas_item(),2)
 	tw.stop(ct)
 	tw.interpolate_property(ct, "margin_top"   , ct.margin_top   ,0, d,t_trans,t_ease)
 	tw.interpolate_property(ct, "margin_left"  , ct.margin_left  ,0, d,t_trans,t_ease)
 	tw.interpolate_property(ct, "margin_right" , ct.margin_right ,0, d,t_trans,t_ease)
 	tw.interpolate_property(ct, "margin_bottom", ct.margin_bottom,0, d,t_trans,t_ease)
 	tw.start()
+	yield(tw, "tween_completed")
+	VisualServer.canvas_item_set_z_index(ct.get_canvas_item(),0)
 
 func _input(event):
-	if event is InputEventKey:
-		if event.scancode == KEY_W and event.pressed:
-			add_card_to_hand(card_cache.card("a"))
-	if event is InputEventMouseButton:
-		#Pressed
-		if event.pressed and event.button_index == BUTTON_LEFT and hovered_card:
-			dragged_card = hovered_card
-			VisualServer.canvas_item_set_z_index(dragged_card.texture_node.get_canvas_item(),2)
-			drag_offset = dragged_card.texture_node.rect_global_position - (get_global_mouse_position() - (dragged_card.texture_node.rect_size /2))
-			drag_offset_factor = 1
-			tw.stop(dragged_card.texture_node)
-			tw.interpolate_property(dragged_card.texture_node, "rect_size", dragged_card.texture_node.rect_size, Vector2(dragged_card.texture_node.texture.get_width(), dragged_card.texture_node.texture.get_height())*DRAG_SIZE_HIGHT/dragged_card.texture_node.texture.get_height(), 0.8, Tween.TRANS_LINEAR, Tween.EASE_IN)
-		#Released
-		if not event.pressed and event.button_index == BUTTON_LEFT and dragged_card:
-#			if mouse_over() == TableLocation.BF:
-			move_card_to(dragged_card, mouse_over())
+		if event is InputEventKey:
+			if event.scancode == KEY_W and event.pressed:
+				add_card_to_hand(card_cache.card("a"))
+			print(event.as_text())
+		elif event is InputEventMouseButton:
+			#Pressed
+			if event.pressed and event.button_index == BUTTON_LEFT and hovered_card:
+				dragged_card = hovered_card
+				VisualServer.canvas_item_set_z_index(dragged_card.texture_node.get_canvas_item(),2)
+				drag_offset = dragged_card.texture_node.rect_global_position - (get_global_mouse_position() - (dragged_card.texture_node.rect_size /2))
+				drag_offset_factor = 1
+				tw.stop(dragged_card.texture_node)
+				tw.interpolate_property(dragged_card.texture_node, "rect_size", dragged_card.texture_node.rect_size, Vector2(dragged_card.texture_node.texture.get_width(), dragged_card.texture_node.texture.get_height())*DRAG_SIZE_HIGHT/dragged_card.texture_node.texture.get_height(), 0.8, Tween.TRANS_LINEAR, Tween.EASE_IN)
+			#Released
+			if not event.pressed and event.button_index == BUTTON_LEFT and dragged_card:
+	#			if mouse_over() == TableLocation.BF:
+				move_card_to(dragged_card, mouse_over())
 
 func _process(delta):
 	if dragged_card:

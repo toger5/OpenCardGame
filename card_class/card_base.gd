@@ -1,8 +1,7 @@
 extends Object
 
-enum CardType {INSTANT, CREATURE}
-enum ManaType {RED, BLUE}
-enum LocationType {DECK, HAND, GRAVEYARD, BATTLEFIELD}
+enum CardType {INSTANT, CREATURE, MANA}
+enum LocationType {DECK, HAND, GRAVEYARD, BATTLEFIELD, MANA}
 
 #props
 var name = "[Define Name]" setget update_tex
@@ -17,15 +16,21 @@ var tapped = false
 var casted = false
 #environment variables
 var texture_node
-var holder_node setget holder_node_setget
-
+var holder_node setget ,holder_node_get
+var player
+var opponent
+var table
+var deck
 #events
-func _casted():
-	casted = true
-	print("card got casted")
 func _init():
 	var im_p = get_script().resource_path.replace(".gd",".png")
 	img_path = im_p
+	table = Global.game_table
+	player = table.get_node("player")
+	opponent = table.get_node("opp")
+func _casted():
+	casted = true
+	print("card got casted")
 func _action_on_card(card):
 	print("action on card: "+ str(card.name))
 	pass
@@ -53,10 +58,8 @@ func render_on(tex_obj):
 	texture_node = tex_obj
 	update_tex()
 
-func holder_node_setget(new_val):
-	if new_val:
-		holder_node = new_val
-	else:
+func holder_node_get():
+	if not holder_node:
 		new_card_holder(100)
 	return holder_node
 func new_holder_node(height):
