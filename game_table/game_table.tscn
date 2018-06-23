@@ -16,7 +16,7 @@ mouse_default_cursor_shape = 0
 size_flags_horizontal = 1
 size_flags_vertical = 1
 theme = ExtResource( 1 )
-_sections_unfolded = [ "Rect", "Theme" ]
+_sections_unfolded = [ "Rect", "Theme", "theme" ]
 __meta__ = {
 "_edit_horizontal_guides_": [  ],
 "_edit_vertical_guides_": [  ]
@@ -37,7 +37,6 @@ alignment = 0
 script = ExtResource( 2 )
 
 [node name="opp" parent="table" index="0" instance=ExtResource( 3 )]
-editor/display_folded = true
 margin_top = 0.0
 margin_right = 1024.0
 margin_bottom = 296.0
@@ -63,7 +62,7 @@ editor/display_folded = true
 margin_top = 304.0
 margin_right = 1024.0
 margin_bottom = 600.0
-is_player = true
+table_side = 1
 
 [node name="TextureRect" type="TextureRect" parent="." index="1"]
 anchor_left = 1.0

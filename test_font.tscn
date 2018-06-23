@@ -1,0 +1,82 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://Font/Arial.ttf" type="DynamicFontData" id=1]
+
+[sub_resource type="DynamicFont" id=1]
+
+size = 20
+outline_size = 0
+outline_color = Color( 1, 1, 1, 1 )
+use_mipmaps = false
+use_filter = false
+font_data = ExtResource( 1 )
+_sections_unfolded = [ "Font", "Settings" ]
+
+[sub_resource type="GDScript" id=2]
+
+script/source = "extends Label
+#export var font = 1 setget anim_text
+var size = 0
+#func _process(delta):
+#	print(delta)
+##	print(has_font_override(\"font\"))
+##	print(get_font(\"font\"))
+#	get_font(\"font\").size = get_global_mouse_position().x /100
+func _ready():
+	size = get_font(\"font\").size
+func _input(ev):
+	if ev is InputEventMagnifyGesture:
+		size *= ev.factor
+		print(size)
+		get_font(\"font\").size = size
+	if ev is InputEventPanGesture:
+		print(\"pasnned\", ev.delta)
+	if ev is InputEventMouseButton:
+		print(\"index\", ev.button_index, \" BUTTON_WHEEL_UP: \", BUTTON_WHEEL_UP)
+		print(\"index\", ev.button_index, \" BUTTON_WHEEL_DOWN: \", BUTTON_WHEEL_DOWN)"
+
+[node name="Label" type="Label" index="0"]
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = -1.0
+margin_top = -1.0
+margin_right = 2075.0
+margin_bottom = 857.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 2
+mouse_default_cursor_shape = 0
+size_flags_horizontal = 1
+size_flags_vertical = 4
+custom_fonts/font = SubResource( 1 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+text = "ups there is not textups there is not textups there is not text
+ups there is not textups there is not textups there is not textups there is not textups there is not textups there is not text
+ups there is not textups there is not textups there is not textups there is not textups there is not textups there is not text
+ups there is not textups there is not textups there is not textups there is not textups there is not textups there is not text
+ups there is not textups there is not textups there is not textups there is not textups there is not textups there is not text
+ups there is not textups there is not textups there is not textups there is not textups there is not textups there is not text
+ups there is not textups there is not textups there is not textups there is not textups there is not textups there is not text
+ups there is not textups there is not textups there is not textups there is not textups there is not textups there is not text
+ups there is not textups there is not textups there is not textups there is not textups there is not textups there is not text
+ups there is not textups there is not textups there is not textups there is not textups there is not textups there is not text
+ups there is not textups there is not textups there is not textups there is not textups there is not textups there is not text
+ups there is not textups there is not textups there is not textups there is not textups there is not textups there is not text
+ups there is not textups there is not textups there is not textups there is not textups there is not textups there is not text
+ups there is not textups there is not textups there is not text"
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+script = SubResource( 2 )
+_sections_unfolded = [ "Custom Colors", "Custom Fonts", "Custom Styles", "custom_fonts/font" ]
+
+[node name="Tween" type="Tween" parent="." index="0"]
+repeat = false
+playback_process_mode = 1
+playback_speed = 1.0
+playback/active = false
+playback/repeat = false
+playback/speed = 1.0
+

@@ -2,7 +2,7 @@ extends "res://card_class/card_base.gd"
 
 #enum CardType = {INSTANT, CREATURE}
 #enum ManaType = {RED, BLUE}
-#enum LocationType = {DECK, HAND, GRAVEYARD, BATTLEFIELD}
+#enum CardLocation = {DECK, HAND, GRAVEYARD, BATTLEFIELD}
 
 #props
 var name = "[Define Name]"
@@ -18,7 +18,8 @@ var max_attack
 
 #func _init():
 	
-#func _casted():
+#func _cast():
+#	._cast()
 
 #func _can_attack():
 
