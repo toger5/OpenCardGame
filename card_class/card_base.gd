@@ -1,6 +1,6 @@
 extends Object
 
-enum CardType {INSTANT, CREATURE, MANA}
+enum CardType {INSTANT, SORCERY, CREATURE, LAND, ENCHANTMENT, ARTIFACT, PLANESWALKER}
 enum CardInteractionState {NONE, HOVER, DRAG} #TODO Renae to InteractionState
 
 signal casted(card)
@@ -36,12 +36,15 @@ var timer = Timer.new()
 
 #events
 func _init():
-	var im_p = get_script().resource_path.replace(".gd",".png")
-	img_path = im_p
+	img_path = get_script().resource_path.replace(".gd",".png")
 	table = Global.game_table
 	player = table.get_node("player")
 	opponent = table.get_node("opp")
+
 	timer.one_shot = true
+	
+	for t in ManaType.list:
+		mana_cost[t] = 0
 func _cast():
 	casted = true
 	print("card got casted")

@@ -1,8 +1,8 @@
 extends Node
 
-enum {RED, BLUE, GREEN}
+enum {WHITE, BLUE, BLACK, RED, GREEN, COLORLESS} #this order should always be used ex. in mana costs (its the original mtg order)
 
-var list = [RED, BLUE, GREEN]
+var list = [WHITE, BLUE, BLACK, RED, GREEN, COLORLESS]
 
 func color(type):
 	match(type):
