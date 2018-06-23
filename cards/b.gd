@@ -6,3 +6,4 @@ func _init():
 	type = CardType.CREATURE
 	max_lives = 1
 	max_attack = 1
+	mana_cost[ManaType.RED] = 2

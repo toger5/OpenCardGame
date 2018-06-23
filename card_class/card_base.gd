@@ -1,7 +1,6 @@
 extends Object
 
 enum CardType {INSTANT, SORCERY, CREATURE, PLANESWALKER, LAND, ENCHANTMENT, ARTIFACT}
-enum ManaType {WHITE, BLUE, BLACK, RED, GREEN, COLORLESS}#this order should always be used ex. in mana costs (its the original mtg order)
 enum LocationType {DECK, HAND, GRAVEYARD, BATTLEFIELD}
 
 #props
@@ -9,7 +8,7 @@ var name = "[Define Name]" setget update_tex
 var text = "[Define text]"
 var type = []
 var img_path = "should get set in init to path of the gd script"
-var mana_cost #saved as a dict with keys of ManaType
+var mana_cost = {ManaType.RED: 0, ManaType.BLUE: 0}
 
 #staus
 var location = null #LocationType

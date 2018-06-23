@@ -19,6 +19,7 @@ config/icon="res://icon.png"
 
 card_renderer="*res://card_class/card_renderer.gd"
 card_cache="*res://card_class/card_cache.gd"
+ManaType="*res://Autoload/ManaType.gd"
 
 [debug]
 
@@ -28,7 +29,6 @@ settings/fps/force_fps=30
 
 window/size/width=1920
 window/size/height=1080
-window/size/fullscreen=true
 window/dpi/allow_hidpi=true
 
 [gui]

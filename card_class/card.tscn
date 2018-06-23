@@ -1,9 +1,10 @@
-[gd_scene load_steps=13 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://Font/Arial.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://card_class/card_populate.gd" type="Script" id=2]
-[ext_resource path="res://icon.png" type="Texture" id=3]
-[ext_resource path="res://resources/magic_card.png" type="Texture" id=4]
+[ext_resource path="res://resources/GreenMana.png" type="Texture" id=3]
+[ext_resource path="res://icon.png" type="Texture" id=4]
+[ext_resource path="res://resources/magic_card.png" type="Texture" id=5]
 
 [sub_resource type="DynamicFont" id=1]
 
@@ -228,6 +229,39 @@ lines_skipped = 0
 max_lines_visible = -1
 _sections_unfolded = [ "Custom Styles", "Margin", "Rect", "custom_styles/normal" ]
 
+[node name="HBoxContainer" type="HBoxContainer" parent="Panel/VBoxContainer/Name" index="0"]
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 1
+mouse_default_cursor_shape = 0
+size_flags_horizontal = 1
+size_flags_vertical = 1
+alignment = 2
+
+[node name="TextureRect" type="TextureRect" parent="Panel/VBoxContainer/Name/HBoxContainer" index="0"]
+visible = false
+modulate = Color( 0.0784314, 0.0784314, 0.588235, 1 )
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 287.0
+margin_right = 337.0
+margin_bottom = 162.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 1
+mouse_default_cursor_shape = 0
+size_flags_horizontal = 1
+size_flags_vertical = 1
+texture = ExtResource( 3 )
+stretch_mode = 0
+_sections_unfolded = [ "Focus", "Visibility" ]
+
 [node name="Label2" type="Label" parent="Panel/VBoxContainer" index="1"]
 visible = false
 anchor_left = 0.0
@@ -264,7 +298,7 @@ mouse_filter = 1
 mouse_default_cursor_shape = 0
 size_flags_horizontal = 1
 size_flags_vertical = 1
-texture = ExtResource( 3 )
+texture = ExtResource( 4 )
 expand = true
 stretch_mode = 7
 _sections_unfolded = [ "Rect" ]
@@ -342,7 +376,7 @@ mouse_filter = 1
 mouse_default_cursor_shape = 0
 size_flags_horizontal = 1
 size_flags_vertical = 1
-texture = ExtResource( 4 )
+texture = ExtResource( 5 )
 stretch_mode = 5
 _sections_unfolded = [ "Focus", "Visibility" ]
 
