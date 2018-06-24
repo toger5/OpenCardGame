@@ -13,7 +13,7 @@ var name = "[Define Name]" setget update_tex
 var text = "[Define text]"
 var type = []
 var img_path = "should get set in init to path of the gd script"
-var mana_cost #saved as a dict with keys of ManaType
+var mana_cost = {}#saved as a dict with keys of ManaType
 var is_reaction = false
 
 #staus
