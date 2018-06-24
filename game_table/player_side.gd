@@ -16,6 +16,7 @@ var DRAG_SIZE_HIGHT = 300
 signal mana_changed(mana)
 signal turn_finished
 
+var cast_wait_time = 0.5
 var is_playing setget turn_changed
 var mana_temp = {
 	ManaType.RED : 0,

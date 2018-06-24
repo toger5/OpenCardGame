@@ -98,7 +98,7 @@ func queue_cast_card(card):
 	if not cast_queue.empty():
 		cast_queue.front().timer.paused = true
 	cast_queue.push_front(card)
-	card.start_cast_timer(2)
+	card.start_cast_timer(current_turn_player().cast_wait_time)
 
 	yield(card.timer, "timeout")
 	card._cast()
