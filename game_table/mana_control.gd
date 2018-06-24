@@ -20,11 +20,14 @@ func update(mana):
 				tw.start()
 		index += 1
 func _show_children(new_val):
-	var mtClass = load("res://Autoload/ManaType.gd")
-	var ManaType = mtClass.new()
 	show_children = new_val
 	for c in get_children():
 		remove_child(c)
+
+	if Engine.editor_hint:
+		editor_mana_update()
+		return
+
 	if show_children:
 		for t in ManaType.list:
 			var lbl = Label.new()
@@ -37,5 +40,25 @@ func _show_children(new_val):
 			sb.bg_color = ManaType.color(t)
 			lbl.add_stylebox_override("normal", sb)
 			lbl.text = "0"
+			visible = false
 			add_child(lbl)
 	add_child(tw)
+
+
+#only editor
+func editor_mana_update():
+	var MTClass = load("res://Autoload/ManaType.gd")
+	var MT = MTClass.new()
+	if show_children:
+		for t in MT.list:
+			var lbl = Label.new()
+			lbl.align = ALIGN_CENTER
+			lbl.valign = ALIGN_CENTER
+			lbl.add_color_override("font_color", Color(1,1,1))
+			lbl.rect_min_size = Vector2(80,80)
+			var sb = StyleBoxFlat.new()
+			sb.set_corner_radius_all(100)
+			sb.bg_color = MT.color(t)
+			lbl.add_stylebox_override("normal", sb)
+			lbl.text = "0"
+			add_child(lbl)
