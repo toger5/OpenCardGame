@@ -61,12 +61,10 @@ func __location_changed(new_val):
 
 #helper functions
 func update_tex():
-	if (texture_node is Sprite) or (texture_node is TextureRect):
-		texture_node.texture = card_renderer.get_card_texture(self)
+	texture_node.texture = card_renderer.get_card_texture(self)
 
-func render_on(tex_obj):
-	texture_node = tex_obj
-	update_tex()
+func render_on(tex):
+	tex = card_renderer.get_card_texture(self)
 
 func holder_node_get():
 	if not holder_node:
@@ -80,9 +78,8 @@ func new_holder_node(height):
 	holder_node.card = self
 	texture_node = holder_node.get_node("TextureRect")
 	update_tex()
-	holder_node.rect_min_size.x = 10 + (height * card_renderer.card_size.aspect())
+	set_card_holder_height(height)
 	holder_node.connect("dropped", self, "_on_drop_to_cast")
-
 	return holder_node
 
 func set_card_holder_height(height):
@@ -117,6 +114,6 @@ func _on_drop_to_cast():
 			if player.get_parent().mouse_over_cast_area() and player.can_cast(self):
 				player.get_parent().queue_cast_card(self)
 			else:
-				animate_to_holder()
+				holder_node.animate_to_holder()
 		CardLocation.BATTLEFIELD:
-			animate_to_holder()
+			holder_node.animate_to_holder()

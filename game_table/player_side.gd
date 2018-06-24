@@ -10,9 +10,8 @@ onready var hand_h_box = $right_area/hand/HBoxContainer
 onready var v_box = $right_area
 onready var name_label = $left_area/Label
 
-var HAND_GAP_TOP = 20
 var BF_CARD_HEIGHT = 350
-var DRAG_SIZE_HIGHT = 240
+var DRAG_SIZE_HIGHT = 300
 
 signal mana_changed(mana)
 signal turn_finished

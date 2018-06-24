@@ -15,8 +15,9 @@ signal dropped
 
 func _ready():
 	set_process(false)
-	connect("mouse_entered", self, "_mouse_enter")
+	connect("mouse_entered", self, "_mouse_entered")
 	connect("mouse_exited", self, "_mouse_exited")
+
 func _process(delta):
 	print("process of card_node aka: the all mighty \"holder\"...")
 	if timer:
@@ -60,18 +61,18 @@ func _input(event):
 				update_set_process()
 				emit_signal("dropped")
 
-func _mouse_enter():
+func _mouse_entered():
 	card.interaction_state = card.CardInteractionState.HOVER
 	if card.location == CardLocation.HAND and not card.casting: 
 		animate_card_big()
 	if card.location == CardLocation.BATTLEFIELD:
-		card.player.get_parent().show_card_preview(self)
+		card.player.get_parent().show_card_preview(card)
 
-func _mouse_exit():
+func _mouse_exited():
 	card.interaction_state = card.CardInteractionState.NONE
 	if not card.casting:
 		animate_to_holder()
-		card.player.get_parent().hide_card_preview(self)
+		card.player.get_parent().hide_card_preview(card)
 
 func animate_card_big():
 	var t_trans = Tween.TRANS_EXPO

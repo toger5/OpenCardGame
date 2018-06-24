@@ -38,9 +38,8 @@ anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
 margin_left = -1.0
-margin_top = -1.0
 margin_right = 1919.0
-margin_bottom = 515.0
+margin_bottom = 516.0
 rect_pivot_offset = Vector2( 0, 0 )
 rect_clip_content = false
 mouse_filter = 1
@@ -119,6 +118,7 @@ align = 1
 percent_visible = 1.0
 lines_skipped = 0
 max_lines_visible = -1
+_sections_unfolded = [ "Custom Styles" ]
 
 [node name="VBoxContainer" type="VBoxContainer" parent="left_area" index="2"]
 anchor_left = 0.0
@@ -136,6 +136,10 @@ size_flags_vertical = 1
 alignment = 0
 
 [node name="mana_control" parent="left_area" index="3" instance=ExtResource( 2 )]
+margin_left = 18.0
+margin_top = 113.0
+margin_right = 78.0
+margin_bottom = 513.0
 
 [node name="FinishTurnButton" type="Button" parent="left_area" index="4"]
 anchor_left = 0.0
@@ -196,11 +200,13 @@ size_flags_vertical = 1
 _sections_unfolded = [ "Rect", "Size Flags", "Visibility" ]
 
 [node name="HBoxContainer" type="HBoxContainer" parent="right_area/hand" index="0"]
-anchor_left = 0.5
+anchor_left = 0.0
 anchor_top = 0.0
-anchor_right = 0.5
+anchor_right = 1.0
 anchor_bottom = 1.0
+margin_left = 20.0
 margin_top = 10.0
+margin_right = -20.0
 margin_bottom = -10.0
 grow_horizontal = 2
 rect_pivot_offset = Vector2( 0, 0 )
@@ -209,9 +215,9 @@ mouse_filter = 1
 mouse_default_cursor_shape = 0
 size_flags_horizontal = 1
 size_flags_vertical = 1
-custom_constants/separation = 0
+custom_constants/separation = 13
 alignment = 1
-_sections_unfolded = [ "Anchor", "Custom Constants", "Grow Direction", "Margin", "Rect", "Size Flags" ]
+_sections_unfolded = [ "Anchor", "Grow Direction", "Margin", "Rect", "Size Flags" ]
 
 [node name="bf" type="Panel" parent="right_area" index="1"]
 editor/display_folded = true

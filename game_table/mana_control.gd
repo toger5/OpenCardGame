@@ -5,20 +5,25 @@ var tw = Tween.new()
 onready var this_player = get_parent().get_parent()
 
 func _ready():
-	this_player.connect("mana_changed", self, "update")
-	
+	if not Engine.editor_hint:
+		this_player.connect("mana_changed", self, "mana_update")
+		add_child(tw)
 
-func update(mana):
+func mana_update(mana):
 	var index = 0
 	for t in ManaType.list:
 		if mana.has(t):
 			var lbl = get_child(index)
-			lbl.text = str(mana[t])
-			if not lbl.text == str(mana[t]):
+			if lbl.text != str(mana[t]):
 				var sb = lbl.get_stylebox("normal")
-				tw.interpolate_property(sb, "bg_color", Color(1,0,0), sb.bg_color, 1, Tween.TRANS_EXPO, Tween.EASE_OUT)
+				tw.interpolate_property(sb, "bg_color", Color(1,0,0), sb.bg_color, 2, Tween.TRANS_EXPO, Tween.EASE_OUT)
+#				tw.interpolate_property(lbl, "modulate", sb.bg_color.lightened(0.4), Color(1,1,1), 2, Tween.TRANS_EXPO, Tween.EASE_OUT)
 				tw.start()
+			lbl.text = str(mana[t])
+			if lbl.text != "0":
+				lbl.visible = true
 		index += 1
+	
 func _show_children(new_val):
 	show_children = new_val
 	for c in get_children():
@@ -34,16 +39,15 @@ func _show_children(new_val):
 			lbl.align = ALIGN_CENTER
 			lbl.valign = ALIGN_CENTER
 			lbl.add_color_override("font_color", Color(1,1,1))
-			lbl.rect_min_size = Vector2(80,80)
+			lbl.rect_min_size = Vector2(60,60)
 			var sb = StyleBoxFlat.new()
 			sb.set_corner_radius_all(100)
 			sb.bg_color = ManaType.color(t)
 			lbl.add_stylebox_override("normal", sb)
 			lbl.text = "0"
-			visible = false
+			lbl.visible = false
+			sb.connect("changed", lbl, "update")
 			add_child(lbl)
-	add_child(tw)
-
 
 #only editor
 func editor_mana_update():
@@ -55,7 +59,7 @@ func editor_mana_update():
 			lbl.align = ALIGN_CENTER
 			lbl.valign = ALIGN_CENTER
 			lbl.add_color_override("font_color", Color(1,1,1))
-			lbl.rect_min_size = Vector2(80,80)
+			lbl.rect_min_size = Vector2(60,60)
 			var sb = StyleBoxFlat.new()
 			sb.set_corner_radius_all(100)
 			sb.bg_color = MT.color(t)

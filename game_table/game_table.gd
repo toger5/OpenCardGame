@@ -54,39 +54,39 @@ func add_card_to_hand(card, to_player, initial_rect = null):
 #	card.location = CardLocation.BATTLEFIELD
 
 #DEPRECATED
-func move_card_to_bf(card):
-	print("DEPRECATED location")
-	if card.location == CardLocation.HAND:
-#				hovered_card = null
-			if cast_queue.empty() or card.type == card.CardType.INSTANT:
-				queue_cast_card(card)
-				yield(self, "cast_finished")
-				print("yield of cast_finished")
-			card.holder_node.animate_to_holder()
-#			mouse_exited_card_tex(card, true)
+#func move_card_to_bf(card):
+#	print("DEPRECATED location")
+#	if card.location == CardLocation.HAND:
+##				hovered_card = null
+#			if cast_queue.empty() or card.type == card.CardType.INSTANT:
+#				queue_cast_card(card)
+#				yield(self, "cast_finished")
+#				print("yield of cast_finished")
+#			card.holder_node.animate_to_holder()
+##			mouse_exited_card_tex(card, true)
 
 #DEPRECATED
-func move_card_to(card, table_location):
-	print("DEPRECATED move_card_to")
-	if TableLocation.BF or TableLocation.OPPONENT_BF:
-		if card.location == CardLocation.HAND:
-#				hovered_card = null
-			if cast_queue.empty() or card.type == card.CardType.INSTANT:
-				queue_cast_card(card)
-				yield(self, "cast_finished")
-				print("yield of cast_finished")
-#		TableLocation.HAND:
-			#sollte eigentlich nicht gehen... vielleicht sollte player gechoosed werden...
-#			h_box = hand_card_h_box
-#			card.location = CardLocation.HAND
-#			pass
-#		TableLocation.OPPONENT_BF:
-#			var target_card = card_under_mouse()
-#			if target_card and card.casted:
-#				card._action_on_card(target_card)
-#		TableLocation.OPPONENT_HAND:
-#			card._action_on_opponent()
-	
+#func move_card_to(card, table_location):
+#	print("DEPRECATED move_card_to")
+#	if TableLocation.BF or TableLocation.OPPONENT_BF:
+#		if card.location == CardLocation.HAND:
+##				hovered_card = null
+#			if cast_queue.empty() or card.type == card.CardType.INSTANT:
+#				queue_cast_card(card)
+#				yield(self, "cast_finished")
+#				print("yield of cast_finished")
+##		TableLocation.HAND:
+#			#sollte eigentlich nicht gehen... vielleicht sollte player gechoosed werden...
+##			h_box = hand_card_h_box
+##			card.location = CardLocation.HAND
+##			pass
+##		TableLocation.OPPONENT_BF:
+##			var target_card = card_under_mouse()
+##			if target_card and card.casted:
+##				card._action_on_card(target_card)
+##		TableLocation.OPPONENT_HAND:
+##			card._action_on_opponent()
+#
 
 func queue_cast_card(card):
 #	for c in cast_queue:
@@ -112,7 +112,7 @@ func queue_cast_card(card):
 	var move_to_h_box = null
 	var hand_h_box = card.player.hand_h_box
 	var bf_h_box = card.player.bf_h_box
-	if card.type == card.CardType.MANA:
+	if card.type == card.CardType.LAND:
 		move_to_h_box = null
 		hand_h_box.remove_child(card.holder_node)
 		card.location = CardLocation.MANA
