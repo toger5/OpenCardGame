@@ -12,8 +12,9 @@ config_version=4
 
 config/name="OpenCardGame"
 run/main_scene="res://game_table/game_table.tscn"
+boot_splash/image="res://cards/flosC.png"
 boot_splash/fullsize=false
-config/icon="res://icon.png"
+config/icon="res://cards/a.png"
 
 [autoload]
 
@@ -22,6 +23,7 @@ card_cache="*res://card_class/card_cache.gd"
 Global="*res://Autoload/Global.gd"
 ManaType="*res://Autoload/ManaType.gd"
 CardLocation="*res://Autoload/CardLocation.gd"
+Dpi="*res://Autoload/Dpi.gd"
 
 [debug]
 

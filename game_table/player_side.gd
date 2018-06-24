@@ -31,6 +31,7 @@ var cards_in_game = []
 
 func _ready():
 	update_tableside()
+	get_tree().get_root().connect("size_changed", self, "update_tableside")
 	for t in ManaType.list:
 		mana_temp[t] = 0
 func get_available_mana():
@@ -71,11 +72,12 @@ func update_tableside():
 	print(table_side)
 	match table_side:
 		TableSide.TOP:
-			$right_area.move_child($right_area/hand, 0)
+			$right_area.move_child(hand_node, 0)
 			$left_area/Label.text = "Player2"
 		TableSide.BOTTOM:
-			$right_area.move_child($right_area/bf, 0)
+			$right_area.move_child(bf_node, 0)
 			$left_area/Label.text = "Player1"
+	hand_node.rect_min_size.y = get_tree().get_root().size.y / 2 / 3
 
 func _on_deck_gui_input(event):
 	#draw card
