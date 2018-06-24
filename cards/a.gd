@@ -4,3 +4,6 @@ func _init():
 	name = "ANice instant"
 	text = "the first and beautiful monster. It actually looks really fcking good"
 	type = CardType.INSTANT
+	
+	mana_cost[ManaType.RED] = 1
+	mana_cost[ManaType.BLUE] = 2

@@ -1,8 +1,10 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://Font/Arial.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://card_class/card_populate.gd" type="Script" id=2]
-[ext_resource path="res://icon.png" type="Texture" id=3]
+[ext_resource path="res://resources/GreenMana.png" type="Texture" id=3]
+[ext_resource path="res://icon.png" type="Texture" id=4]
+[ext_resource path="res://resources/magic_card.png" type="Texture" id=5]
 
 [sub_resource type="DynamicFont" id=1]
 
@@ -27,11 +29,11 @@ content_margin_top = -1.0
 content_margin_bottom = -1.0
 bg_color = Color( 0.6, 0.6, 0.6, 1 )
 draw_center = true
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color( 0.815686, 0.447059, 0.447059, 1 )
+border_width_left = 10
+border_width_top = 10
+border_width_right = 10
+border_width_bottom = 10
+border_color = Color( 0, 0, 0, 1 )
 border_blend = false
 corner_radius_top_left = 24
 corner_radius_top_right = 24
@@ -52,8 +54,8 @@ _sections_unfolded = [ "Border", "Border Width", "Content Margin", "Corner Radiu
 
 content_margin_left = 20.0
 content_margin_right = -1.0
-content_margin_top = 15.0
-content_margin_bottom = 15.0
+content_margin_top = 0.0
+content_margin_bottom = 0.0
 bg_color = Color( 0.384314, 0.360784, 0.360784, 1 )
 draw_center = true
 border_width_left = 0
@@ -88,6 +90,44 @@ font_data = ExtResource( 1 )
 _sections_unfolded = [ "Font", "Settings" ]
 
 [sub_resource type="StyleBoxFlat" id=6]
+
+content_margin_left = -1.0
+content_margin_right = -1.0
+content_margin_top = -1.0
+content_margin_bottom = -1.0
+bg_color = Color( 0.6, 0.6, 0.6, 1 )
+draw_center = true
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+border_color = Color( 0.8, 0.8, 0.8, 1 )
+border_blend = false
+corner_radius_top_left = 0
+corner_radius_top_right = 0
+corner_radius_bottom_right = 0
+corner_radius_bottom_left = 0
+corner_detail = 8
+expand_margin_left = 0.0
+expand_margin_right = 0.0
+expand_margin_top = 0.0
+expand_margin_bottom = 0.0
+shadow_color = Color( 0, 0, 0, 0.6 )
+shadow_size = 0
+anti_aliasing = true
+anti_aliasing_size = 1
+
+[sub_resource type="DynamicFont" id=7]
+
+size = 20
+outline_size = 0
+outline_color = Color( 1, 1, 1, 1 )
+use_mipmaps = false
+use_filter = false
+font_data = ExtResource( 1 )
+_sections_unfolded = [ "Font", "Settings", "font_data" ]
+
+[sub_resource type="StyleBoxFlat" id=8]
 
 content_margin_left = -1.0
 content_margin_right = -1.0
@@ -138,6 +178,7 @@ anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 1.0
 anchor_bottom = 1.0
+margin_bottom = -100.0
 rect_pivot_offset = Vector2( 0, 0 )
 rect_clip_content = false
 mouse_filter = 0
@@ -152,10 +193,10 @@ anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = 10.0
-margin_top = 10.0
-margin_right = -10.0
-margin_bottom = -10.0
+margin_left = 27.0
+margin_top = 28.0
+margin_right = -24.0
+margin_bottom = -46.0
 rect_pivot_offset = Vector2( 0, 0 )
 rect_clip_content = false
 mouse_filter = 1
@@ -171,8 +212,8 @@ anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_right = 368.0
-margin_bottom = 65.0
+margin_right = 337.0
+margin_bottom = 76.0
 rect_pivot_offset = Vector2( 0, 0 )
 rect_clip_content = false
 mouse_filter = 2
@@ -180,19 +221,55 @@ mouse_default_cursor_shape = 0
 size_flags_horizontal = 1
 size_flags_vertical = 4
 custom_styles/normal = SubResource( 4 )
-text = "tttttt"
+text = "tttttttttttttttttttttttttttttttt
+"
+clip_text = true
 percent_visible = 1.0
 lines_skipped = 0
 max_lines_visible = -1
-_sections_unfolded = [ "Custom Styles", "Margin", "custom_styles/normal" ]
+_sections_unfolded = [ "Custom Styles", "Margin", "Rect", "custom_styles/normal" ]
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Panel/VBoxContainer/Name" index="0"]
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 1
+mouse_default_cursor_shape = 0
+size_flags_horizontal = 1
+size_flags_vertical = 1
+alignment = 2
+
+[node name="TextureRect" type="TextureRect" parent="Panel/VBoxContainer/Name/HBoxContainer" index="0"]
+visible = false
+modulate = Color( 0.0784314, 0.0784314, 0.588235, 1 )
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 287.0
+margin_right = 337.0
+margin_bottom = 162.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 1
+mouse_default_cursor_shape = 0
+size_flags_horizontal = 1
+size_flags_vertical = 1
+texture = ExtResource( 3 )
+stretch_mode = 0
+_sections_unfolded = [ "Focus", "Visibility" ]
 
 [node name="Label2" type="Label" parent="Panel/VBoxContainer" index="1"]
+visible = false
 anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
 margin_top = 69.0
-margin_right = 368.0
+margin_right = 334.0
 margin_bottom = 93.0
 rect_pivot_offset = Vector2( 0, 0 )
 rect_clip_content = false
@@ -211,9 +288,9 @@ anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_top = 97.0
-margin_right = 368.0
-margin_bottom = 327.0
+margin_top = 80.0
+margin_right = 337.0
+margin_bottom = 310.0
 rect_min_size = Vector2( 0, 230 )
 rect_pivot_offset = Vector2( 0, 0 )
 rect_clip_content = false
@@ -221,29 +298,85 @@ mouse_filter = 1
 mouse_default_cursor_shape = 0
 size_flags_horizontal = 1
 size_flags_vertical = 1
-texture = ExtResource( 3 )
+texture = ExtResource( 4 )
 expand = true
 stretch_mode = 7
 _sections_unfolded = [ "Rect" ]
 
-[node name="Label" type="Label" parent="Panel/VBoxContainer" index="3"]
+[node name="Type" type="Label" parent="Panel/VBoxContainer" index="3"]
 anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_top = 331.0
-margin_right = 368.0
-margin_bottom = 608.0
+margin_top = 314.0
+margin_right = 337.0
+margin_bottom = 338.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 2
+mouse_default_cursor_shape = 0
+size_flags_horizontal = 1
+size_flags_vertical = 4
+custom_styles/normal = SubResource( 6 )
+custom_fonts/font = SubResource( 7 )
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+_sections_unfolded = [ "Custom Fonts", "Custom Styles", "Margin", "custom_fonts/font", "custom_styles/normal" ]
+
+[node name="rich_text_label" type="Label" parent="Panel/VBoxContainer" index="4"]
+editor/display_folded = true
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_top = 342.0
+margin_right = 337.0
+margin_bottom = 454.0
 rect_pivot_offset = Vector2( 0, 0 )
 rect_clip_content = false
 mouse_filter = 2
 mouse_default_cursor_shape = 0
 size_flags_horizontal = 1
 size_flags_vertical = 3
-custom_styles/normal = SubResource( 6 )
+custom_styles/normal = SubResource( 8 )
 autowrap = true
 percent_visible = 1.0
 lines_skipped = 0
 max_lines_visible = -1
 _sections_unfolded = [ "Custom Styles", "Size Flags", "custom_styles/normal" ]
+
+[node name="AttackAndHealth" type="Label" parent="Panel/VBoxContainer/rich_text_label" index="0"]
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = -40.0
+margin_top = -35.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 2
+mouse_default_cursor_shape = 0
+size_flags_horizontal = 1
+size_flags_vertical = 4
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+
+[node name="TextureRect" type="TextureRect" parent="." index="1"]
+visible = false
+modulate = Color( 1, 1, 1, 0.329412 )
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 1
+mouse_default_cursor_shape = 0
+size_flags_horizontal = 1
+size_flags_vertical = 1
+texture = ExtResource( 5 )
+stretch_mode = 5
+_sections_unfolded = [ "Focus", "Visibility" ]
 
