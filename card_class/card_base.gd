@@ -78,12 +78,9 @@ func new_holder_node(height):
 	holder_node.card = self
 	texture_node = holder_node.get_node("TextureRect")
 	update_tex()
-	set_card_holder_height(height)
 	holder_node.connect("dropped", self, "_on_drop_to_cast")
 	return holder_node
 
-func set_card_holder_height(height):
-	holder_node.rect_min_size.x = 8 + (height * card_renderer.card_size.aspect())
 
 #TODO move to some global class
 func hover_card_hand_size():

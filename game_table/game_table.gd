@@ -125,7 +125,6 @@ func queue_cast_card(card):
 		card.holder_node.get_parent().remove_child(card.holder_node)
 	if move_to_h_box:
 		var tex_global_rect = card.texture_node.get_global_rect()
-		card.set_card_holder_height(move_to_h_box.rect_size.y)
 		card.holder_node.get_parent().remove_child(card.holder_node)
 		move_to_h_box.add_child(card.holder_node)
 		yield(move_to_h_box, "sort_children")
@@ -181,6 +180,8 @@ func _input(event):
 				player.add_card(card_to_add)
 			if event.scancode == KEY_Q and event.pressed:
 				opponent.add_card(card_to_add)
+			if event.scancode == KEY_R and event.pressed:
+				tw.interpolate_property(player.bf_h_box, "margin_bottom", 0, -100, 4,Tween.TRANS_LINEAR,Tween.EASE_OUT)
 #		elif event is InputEventMouseButton:
 #			#Pressed
 #			if event.pressed and event.button_index == BUTTON_LEFT and hovered_card:
