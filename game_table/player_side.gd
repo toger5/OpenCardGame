@@ -10,7 +10,7 @@ onready var hand_h_box = $right_area/hand/HBoxContainer
 onready var v_box = $right_area
 onready var name_label = $left_area/Label
 
-var MIN_HAND_HIGHT = 240
+var HAND_GAP_TOP = 20
 var BF_CARD_HEIGHT = 350
 var DRAG_SIZE_HIGHT = 240
 
@@ -33,7 +33,6 @@ var cards_in_game = []
 var mana setget ,get_available_mana
 
 func _ready():
-	hand_h_box.rect_min_size.y = MIN_HAND_HIGHT + 100
 	update_tableside()
 
 func get_available_mana():
@@ -78,12 +77,17 @@ func _on_deck_gui_input(event):
 	#draw card
 	if event is InputEventMouseButton:
 		if event.pressed and event.button_index == BUTTON_LEFT and is_playing:
-			if not cardnames_deck.empty():
-				add_card(card_cache.card(cardnames_deck.pop_front()) )
-			else:
-				print("There are no cards left (in Deck)")
+			draw_card()
+func draw_card():
+	if not cardnames_deck.empty():
+		add_card(card_cache.card(cardnames_deck.pop_front()) )
+	else:
+		print("There are no cards left (in Deck)")
+
 func add_card(card):
 	card.connect("location_changed", self, "_card_location_changed")
+	card.player = self
+	card.opponent = get_parent().get_child(abs(get_index() - 1))
 	cards_in_game.append(card)
 	get_parent().add_card_to_hand(card, self, $left_area/deck.get_global_rect())
 	
@@ -94,6 +98,9 @@ func _card_location_changed(card):
 func _on_FinishTurnButton_pressed():
 	emit_signal("turn_finished")
 
+func can_cast(card):
+	print("trying to cast: ", card.name)
+	return true
 func turn_changed(new_val):
 	is_playing = new_val
 	$left_area/FinishTurnButton.disabled = not is_playing

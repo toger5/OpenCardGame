@@ -98,7 +98,7 @@ func queue_cast_card(card):
 	if not cast_queue.empty():
 		cast_queue.front().timer.paused = true
 	cast_queue.push_front(card)
-	card.start_card_timer(2)
+	card.start_cast_timer(2)
 
 	yield(card.timer, "timeout")
 	card._cast()
@@ -143,11 +143,13 @@ func mouse_entered_card_tex(card):
 #		tw.interpolate_property(card_preview_tr, "modulate:a", card_preview_tr.modulate.a, 1,0.2, Tween.TRANS_LINEAR, Tween.EASE_IN)
 
 func show_card_preview(card):
-		card_preview_tr.texture = card.texture_node.texture
-		tw.interpolate_property(card_preview_tr, "modulate:a", card_preview_tr.modulate.a, 1,0.2, Tween.TRANS_LINEAR, Tween.EASE_IN)
+	card_preview_tr.texture = card.texture_node.texture
+	tw.interpolate_property(card_preview_tr, "modulate:a", card_preview_tr.modulate.a, 1,0.2, Tween.TRANS_LINEAR, Tween.EASE_IN)
+	tw.start()
 
 func hide_card_preview(card):
 	tw.interpolate_property(card_preview_tr, "modulate:a",card_preview_tr.modulate.a, 0, 0.2,Tween.TRANS_LINEAR, Tween.EASE_OUT)
+	tw.start()
 #DEPRECATED
 #func mouse_exited_card_tex(card, force = false):
 #	hovered_card = null

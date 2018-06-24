@@ -49,6 +49,7 @@ margin_bottom = 296.0
 margin_left = 211.0
 margin_right = 1024.0
 margin_bottom = 296.0
+_sections_unfolded = [ "Rect" ]
 
 [node name="hand" parent="table/opp/right_area" index="0"]
 margin_right = 813.0

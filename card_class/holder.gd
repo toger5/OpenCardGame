@@ -11,9 +11,12 @@ var process_for_progressbar = false
 onready var tex_node = $TextureRect
 onready var tween = $Tween
 
+signal dropped
+
 func _ready():
 	set_process(false)
-
+	connect("mouse_entered", self, "_mouse_enter")
+	connect("mouse_exited", self, "_mouse_exited")
 func _process(delta):
 	print("process of card_node aka: the all mighty \"holder\"...")
 	if timer:
@@ -21,6 +24,7 @@ func _process(delta):
 	if card.interaction_state == card.CardInteractionState.DRAG:
 		drag_offset_factor = max(0,(drag_offset_factor * 0.8) - delta)
 		tex_node.rect_global_position = (get_global_mouse_position() - tex_node.rect_size/2) + drag_offset * drag_offset_factor
+
 func set_timer(new_val):
 	timer = new_val
 	progress.visible = true
@@ -29,6 +33,7 @@ func set_timer(new_val):
 	update_set_process()
 	if not timer.is_connected("timeout", self, "_timeout"):
 		timer.connect("timeout", self, "_timeout")
+
 func _timeout():
 	set_process(false)
 	process_for_progressbar = false
@@ -46,17 +51,27 @@ func _gui_input(event):
 			drag_offset_factor = 1
 			tween.stop(tex_node)
 			tween.interpolate_property(tex_node, "rect_size", tex_node.rect_size, Vector2(tex_node.texture.get_width(), tex_node.texture.get_height())*card.player.DRAG_SIZE_HIGHT/tex_node.texture.get_height(), 0.8, Tween.TRANS_LINEAR, Tween.EASE_IN)
+			
 func _input(event):
 	if event is InputEventMouseButton:
 		if not event.pressed and event.button_index == BUTTON_LEFT:
 			if card.interaction_state == card.CardInteractionState.DRAG:
-				if card.location == CardLocation.HAND:
-					process_for_drag = false
-					update_set_process()
-					if card.player.get_parent().mouse_over_cast_area():
-						card.player.get_parent().queue_cast_card(card)
-					else:
-						animate_to_holder()
+				process_for_drag = false
+				update_set_process()
+				emit_signal("dropped")
+
+func _mouse_enter():
+	card.interaction_state = card.CardInteractionState.HOVER
+	if card.location == CardLocation.HAND and not card.casting: 
+		animate_card_big()
+	if card.location == CardLocation.BATTLEFIELD:
+		card.player.get_parent().show_card_preview(self)
+
+func _mouse_exit():
+	card.interaction_state = card.CardInteractionState.NONE
+	if not card.casting:
+		animate_to_holder()
+		card.player.get_parent().hide_card_preview(self)
 
 func animate_card_big():
 	var t_trans = Tween.TRANS_EXPO

@@ -39,9 +39,8 @@ func _init():
 	var im_p = get_script().resource_path.replace(".gd",".png")
 	img_path = im_p
 	table = Global.game_table
-	player = table.get_node("player")
-	opponent = table.get_node("opp")
 	timer.one_shot = true
+
 func _cast():
 	casted = true
 	print("card got casted")
@@ -71,7 +70,7 @@ func render_on(tex_obj):
 
 func holder_node_get():
 	if not holder_node:
-		new_holder_node(player.MIN_HAND_HIGHT)
+		new_holder_node(player.hand_h_box.rect_size.y)
 	return holder_node
 
 func new_holder_node(height):
@@ -81,9 +80,9 @@ func new_holder_node(height):
 	holder_node.card = self
 	texture_node = holder_node.get_node("TextureRect")
 	update_tex()
-	holder_node.rect_min_size.x = (height * card_renderer.card_size.aspect())
-	holder_node.connect("mouse_entered", self, "_mouse_enter_card")
-	holder_node.connect("mouse_exited", self, "_mouse_exit_card")
+	holder_node.rect_min_size.x = 10 + (height * card_renderer.card_size.aspect())
+	holder_node.connect("dropped", self, "_on_drop_to_cast")
+
 	return holder_node
 
 func set_card_holder_height(height):
@@ -100,7 +99,7 @@ func hover_card_top_right_size():
 	return Vector2(y*screen_factor*card_renderer.card_size.aspect(), y*screen_factor)
 
 # card methods
-func start_card_timer(wait_time):
+func start_cast_timer(wait_time):
 	VisualServer.canvas_item_set_z_index(texture_node.get_canvas_item(),2)
 	casting = true
 	if not timer.get_parent():
@@ -111,15 +110,13 @@ func start_card_timer(wait_time):
 	yield(timer, "timeout")
 	casting = false
 	VisualServer.canvas_item_set_z_index(texture_node.get_canvas_item(),0)
-	
-func _mouse_enter_card():
-	interaction_state = CardInteractionState.HOVER
-	if location == CardLocation.HAND and not casting: 
-		holder_node.animate_card_big()
-	if location == CardLocation.BATTLEFIELD:
-		player.get_parent().show_card_preview(self)
 
-func _mouse_exit_card():
-	holder_node.animate_to_holder()
-	player.get_parent().hide_card_preview(self)
-	interaction_state = CardInteractionState.NONE
+func _on_drop_to_cast():
+	match location:
+		CardLocation.HAND:
+			if player.get_parent().mouse_over_cast_area() and player.can_cast(self):
+				player.get_parent().queue_cast_card(self)
+			else:
+				animate_to_holder()
+		CardLocation.BATTLEFIELD:
+			animate_to_holder()
