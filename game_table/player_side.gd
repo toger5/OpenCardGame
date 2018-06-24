@@ -18,10 +18,7 @@ signal turn_finished
 
 var cast_wait_time = 0.5
 var is_playing setget turn_changed
-var mana_temp = {
-	ManaType.RED : 0,
-	ManaType.BLUE : 0
-}
+var mana_temp = {}
 var cardnames_deck = []
 var cards_in_game = []
 
@@ -30,11 +27,12 @@ var cards_in_game = []
 #var cards_graveyard = [] setget ,get_cards_graveyard
 #var cards_battlefield = [] setget ,get_cards_battlefield
 
-var mana setget ,get_available_mana
+#var mana setget ,get_available_mana
 
 func _ready():
 	update_tableside()
-
+	for t in ManaType.list:
+		mana_temp[t] = 0
 func get_available_mana():
 	var av_mana = {}
 	for mt in ManaType.list:
@@ -43,7 +41,13 @@ func get_available_mana():
 		if not c.tapped:
 			av_mana[c.mana_type] += 1
 	return av_mana
-
+func tap_mana_for_temp(mana):
+	for c in get_cards_mana_array():
+		if mana[c.mana_type] > 0:
+			c.tapped = true
+			mana_temp[c.mana_type] += 1
+			mana[c.mana_type] -= 1
+	emit_signal("mana_changed", get_available_mana())
 func get_cards_hand():
 	return get_cards_in(CardLocation.HAND)
 	
@@ -93,13 +97,14 @@ func add_card(card):
 	
 func _card_location_changed(card):
 	if card.location == CardLocation.MANA:
-		emit_signal("mana_changed", self.mana)
+		emit_signal("mana_changed", get_available_mana())
 
 func _on_FinishTurnButton_pressed():
 	emit_signal("turn_finished")
 
 func can_cast(card):
 	print("trying to cast: ", card.name)
+#	if
 	return true
 func turn_changed(new_val):
 	is_playing = new_val

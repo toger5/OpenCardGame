@@ -53,7 +53,8 @@ func _action_on_opponent():
 	pass
 func _location_changed():
 	pass
-
+func _can_cast():
+	return true
 #internal events
 func __location_changed(new_val):
 	location = new_val
@@ -105,10 +106,18 @@ func start_cast_timer(wait_time):
 	casting = false
 	VisualServer.canvas_item_set_z_index(texture_node.get_canvas_item(),0)
 
+func can_cast_mana():
+	var mana = player.get_available_mana()
+	for t in ManaType.list:
+		if mana_cost[t] > mana[t]:
+			return false
+	return true
+
 func _on_drop_to_cast():
 	match location:
 		CardLocation.HAND:
-			if player.get_parent().mouse_over_cast_area() and player.can_cast(self):
+			if player.get_parent().mouse_over_cast_area() and player.can_cast(self) and _can_cast() and can_cast_mana():
+				player.tap_mana_for_temp(mana_cost)
 				player.get_parent().queue_cast_card(self)
 			else:
 				holder_node.animate_to_holder()
