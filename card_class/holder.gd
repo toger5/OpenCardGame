@@ -89,10 +89,19 @@ func animate_card_big():
 	VisualServer.canvas_item_set_z_index(ct.get_canvas_item(), 4)
 	tween.stop_all()
 	var si = card.hover_card_hand_size()
-	tween.interpolate_property(ct, "margin_top",0, -si.y + rect_size.y/2 , d,t_trans,t_ease)
-	tween.interpolate_property(ct, "margin_left",0, -(si.x +rect_size.x)/2, d,t_trans,t_ease)
-	tween.interpolate_property(ct, "margin_right",0, (si.x +rect_size.x)/2, d,t_trans,t_ease)
-	tween.interpolate_property(ct, "margin_bottom",0, rect_size.y/2 -rect_size.y, d,t_trans,t_ease)
+	for p in card.player.get_property_list():
+		print(p["name"])
+	var m_top = rect_size.y/2 - si.y
+	var m_bottom = -rect_size.y/2
+	if card.player.table_side == card.player.TableSide.TOP:
+		var margin_temp = m_top
+		m_top = -m_bottom
+		m_bottom = -margin_temp
+		
+	tween.interpolate_property(ct, "margin_top", 0, m_top , d,t_trans,t_ease)
+	tween.interpolate_property(ct, "margin_bottom", 0, m_bottom, d,t_trans,t_ease)
+	tween.interpolate_property(ct, "margin_left", 0, -(si.x +rect_size.x)/2, d,t_trans,t_ease)
+	tween.interpolate_property(ct, "margin_right", 0, (si.x +rect_size.x)/2, d,t_trans,t_ease)
 	tween.start()
 
 func animate_to_holder():
@@ -113,7 +122,10 @@ func animate_to_holder():
 	
 func update_holder_size():
 	if get_parent() is HBoxContainer:
-		rect_min_size.x = get_parent_control().rect_size.y * card_renderer.card_size.aspect()
+		if card.tapped:
+			rect_min_size.x = get_parent_control().rect_size.y
+		else:
+			rect_min_size.x = get_parent_control().rect_size.y * card_renderer.card_size.aspect()
 
 func update_set_process():
 	set_process(process_for_drag or process_for_progressbar)

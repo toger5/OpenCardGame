@@ -50,7 +50,7 @@ size_flags_stretch_ratio = 3.5
 alignment = 0
 script = ExtResource( 1 )
 _sections_unfolded = [ "Size Flags" ]
-table_side = null
+table_side = 1
 
 [node name="left_area" type="Control" parent="." index="0"]
 anchor_left = 0.0
