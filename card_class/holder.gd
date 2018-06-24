@@ -26,6 +26,12 @@ func _process(delta):
 		drag_offset_factor = max(0,(drag_offset_factor * 0.8) - delta)
 		tex_node.rect_global_position = (get_global_mouse_position() - tex_node.rect_size/2) + drag_offset * drag_offset_factor
 
+func _enter_tree():
+	get_parent().connect("resized", self, "update_holder_size")
+	update_holder_size()
+func _exit_tree():
+	get_parent().disconnect("resized", self, "update_holder_size")
+
 func set_timer(new_val):
 	timer = new_val
 	progress.visible = true
@@ -105,5 +111,9 @@ func animate_to_holder():
 	yield(tween, "tween_completed")
 	VisualServer.canvas_item_set_z_index(ct.get_canvas_item(),0)
 	
+func update_holder_size():
+	if get_parent() is HBoxContainer:
+		rect_min_size.x = get_parent_control().rect_size.y * card_renderer.card_size.aspect()
+
 func update_set_process():
 	set_process(process_for_drag or process_for_progressbar)
