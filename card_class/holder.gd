@@ -108,7 +108,7 @@ func animate_card_big():
 
 func animate_to_holder():
 	var ct = tex_node
-	VisualServer.canvas_item_set_z_index(ct.get_canvas_item(),4)
+	VisualServer.canvas_item_set_z_index(ct.get_canvas_item(),3)
 	tween.stop_all()
 	var t_trans = Tween.TRANS_BOUNCE
 	var t_ease = Tween.EASE_OUT
