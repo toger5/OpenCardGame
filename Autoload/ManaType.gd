@@ -9,3 +9,5 @@ func color(type):
 		RED: return Color(0.8, 0.2, 0.2)
 		BLUE: return Color(0.2, 0.2, 0.8)
 		GREEN: return Color(0.2, 0.8, 0.2)
+	print("ManaType color not found")
+	return Color(1,0,0)
