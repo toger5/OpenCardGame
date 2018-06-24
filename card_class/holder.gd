@@ -1,4 +1,4 @@
-extends Control
+extends Panel
 
 onready var progress = $TextureRect/ProgressBar
 var timer setget set_timer
@@ -17,6 +17,8 @@ func _ready():
 	set_process(false)
 	connect("mouse_entered", self, "_mouse_entered")
 	connect("mouse_exited", self, "_mouse_exited")
+	card.connect("tapped_changed", self, "update_tap_status")
+	
 
 func _process(delta):
 	print("process of card_node aka: the all mighty \"holder\"...")
@@ -127,5 +129,12 @@ func update_holder_size():
 		else:
 			rect_min_size.x = get_parent_control().rect_size.y * card_renderer.card_size.aspect()
 
+func update_tap_status():
+	rect_min_size.x += 10
+#	if card.tapped:
+#		var t = 0.3
+#		tween.interpolate_property(self, "rect_min_size:x", rect_min_size.x, get_parent().rect_size.y, t, Tween.TRANS_BOUNCE, Tween.EASE_OUT)
+		
+	
 func update_set_process():
 	set_process(process_for_drag or process_for_progressbar)

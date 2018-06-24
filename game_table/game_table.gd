@@ -182,6 +182,12 @@ func _input(event):
 				opponent.add_card(card_to_add)
 			if event.scancode == KEY_R and event.pressed:
 				tw.interpolate_property(player.bf_h_box, "margin_bottom", 0, -100, 4,Tween.TRANS_LINEAR,Tween.EASE_OUT)
+				
+			#debugigng
+			if event.pressed and event.scancode == KEY_T:
+				player.get_cards_battlefield()[0].tapped = true
+				
+				
 #		elif event is InputEventMouseButton:
 #			#Pressed
 #			if event.pressed and event.button_index == BUTTON_LEFT and hovered_card:

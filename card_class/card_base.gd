@@ -18,7 +18,7 @@ var is_reaction = false
 
 #staus
 var location = null setget __location_changed#CardLocation 
-var tapped = false
+var tapped = false setget _tapped_changed
 var casted = false
 var casting = false
 var interaction_state = CardInteractionState.NONE
@@ -30,6 +30,9 @@ var player
 var opponent
 var table
 var deck
+
+#signals
+signal tapped_changed
 
 #hleper variables
 var timer = Timer.new()
@@ -55,6 +58,10 @@ func _location_changed():
 	pass
 func _can_cast():
 	return true
+func _tapped_changed(new_tap_status):
+	if not new_tap_status == tapped:
+		tapped = new_tap_status
+	emit_signal("tapped_changed")
 #internal events
 func __location_changed(new_val):
 	location = new_val
@@ -123,3 +130,4 @@ func _on_drop_to_cast():
 				holder_node.animate_to_holder()
 		CardLocation.BATTLEFIELD:
 			holder_node.animate_to_holder()
+
