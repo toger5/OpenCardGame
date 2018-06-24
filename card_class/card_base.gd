@@ -124,7 +124,7 @@ func _on_drop_to_cast():
 	match location:
 		CardLocation.HAND:
 			if player.get_parent().mouse_over_cast_area() and player.can_cast(self) and _can_cast() and can_cast_mana():
-				player.tap_mana_for_temp(mana_cost)
+				player.tap_mana(mana_cost)
 				player.get_parent().queue_cast_card(self)
 			else:
 				holder_node.animate_to_holder()

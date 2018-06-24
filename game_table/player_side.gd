@@ -42,12 +42,12 @@ func get_available_mana():
 		if not c.tapped:
 			av_mana[c.mana_type] += 1
 	return av_mana
-func tap_mana_for_temp(mana):
+func tap_mana(mana):
+	var m = mana
 	for c in get_cards_mana_array():
-		if mana[c.mana_type] > 0:
+		if m[c.mana_type] > 0:
 			c.tapped = true
-			mana_temp[c.mana_type] += 1
-			mana[c.mana_type] -= 1
+			m[c.mana_type] -= 1
 	emit_signal("mana_changed", get_available_mana())
 func get_cards_hand():
 	return get_cards_in(CardLocation.HAND)
