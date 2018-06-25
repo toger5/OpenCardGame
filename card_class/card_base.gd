@@ -23,7 +23,7 @@ var casting = false
 
 #environment variables
 var texture_node
-var holder_node setget ,holder_node_get
+var holder_node setget ,_holder_node_get
 var player #is added in player_side.gd
 var opponent
 var table
@@ -65,17 +65,8 @@ func __location_changed(new_val):
 	location = new_val
 	emit_signal("location_changed", self)
 
-func _on_drop_to_cast():
-	match location:
-		CardLocation.HAND:
-			if Global.game_table.mouse_over_cast_area() and player.can_cast(self) and _can_cast() and can_cast_mana():
-				player.tap_mana(mana_cost)
-				player.get_parent().queue_cast_card(self)
-			else:
-				holder_node.animate_to_holder()
-		CardLocation.BATTLEFIELD:
-			Global.game_table
-			holder_node.animate_to_holder()
+#func _on_drop_to_cast():
+	
 
 #helper functions
 func update_tex():
@@ -84,7 +75,7 @@ func update_tex():
 func render_on(tex):
 	tex = card_renderer.get_card_texture(self)
 
-func holder_node_get():
+func _holder_node_get():
 	if not holder_node:
 		new_holder_node(player.hand_h_box.rect_size.y)
 	return holder_node
@@ -96,7 +87,8 @@ func new_holder_node(height):
 	holder_node.card = self
 	texture_node = holder_node.get_node("TextureRect")
 	update_tex()
-	holder_node.connect("dropped", self, "_on_drop_to_cast")
+#	holder_node.connect("drag_start", self, "_on_drag")
+#	holder_node.connect("dropped", self, "_on_drop")
 	return holder_node
 
 
@@ -122,10 +114,3 @@ func start_cast_timer(wait_time):
 	yield(timer, "timeout")
 	casting = false
 	VisualServer.canvas_item_set_z_index(texture_node.get_canvas_item(),0)
-
-func can_cast_mana():
-	var mana = player.get_available_mana()
-	for t in ManaType.list:
-		if mana_cost[t] > mana[t]:
-			return false
-	return true

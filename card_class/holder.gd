@@ -16,7 +16,8 @@ var interaction_state = InteractionState.NONE
 var is_indication_label_shown = false
 var process_for_drag = false
 var process_for_progressbar = false
-signal dropped
+signal dropped(card)
+signal drag_start(card)
 
 func _ready():
 	set_process(false)
@@ -37,19 +38,17 @@ func _process(delta):
 		if card.location == CardLocation.BATTLEFIELD:
 			#check if over opponent area
 			var g_table = Global.game_table
-			var TLoc = g_table.TableLocation
-			var current_table_loc = g_table.mouse_over()
+			var current_table_loc = TableLocation.mouse_pos()
 			
-			var OPPONENT_BF = TLoc.TOP_BF
-			if card.player.table_side == card.player.TableSide.TOP:
-				OPPONENT_BF = TLoc.BOTTOM_BF
+			var OPPONENT_BF = TableLocation.opponent_bf(card.player)
 			
 			if current_table_loc == OPPONENT_BF and not is_indication_label_shown:
-				Global.game_table.indicate_attack_phase(true, 2) #true: indicate with gap, true: for without label
+				card.player.indicate_attack_phase(true, 2) #true: indicate with gap, true: for without label
 				is_indication_label_shown = true
 			elif current_table_loc != OPPONENT_BF and is_indication_label_shown:
-				Global.game_table.indicate_attack_phase(true, 1) #true: indicate with gap, false: for without label
+				card.player.indicate_attack_phase(true, 1) #true: indicate with gap, false: for without label
 				is_indication_label_shown = false
+
 func _enter_tree():
 	get_parent().connect("resized", self, "update_holder_size")
 	update_holder_size()
@@ -86,21 +85,15 @@ func _gui_input(event):
 			drag_offset_factor = 1
 			tween.stop(tex_node)
 			tween.interpolate_property(tex_node, "rect_size", tex_node.rect_size, Vector2(tex_node.texture.get_width(), tex_node.texture.get_height())*card.player.DRAG_SIZE_HIGHT/tex_node.texture.get_height(), 0.8, Tween.TRANS_LINEAR, Tween.EASE_IN)
-			if card.location == CardLocation.BATTLEFIELD:
-				Global.game_table.indicate_attack_phase(true, 1) #true: indicate with gap, false: for without label
-			
+			card.player.indicate_attack_phase(true, 1)
+
 func _input(event):
 	if event is InputEventMouseButton:
 		if not event.pressed and event.button_index == BUTTON_LEFT:
 			if interaction_state == InteractionState.DRAG:
-				if card.location == CardLocation.BATTLEFIELD:
-					if is_indication_label_shown:
-						Global.game_table.start_attack_phase()
-					else:
-						Global.game_table.indicate_attack_phase(false, 0) # #false: indicate with gap, false: for without label
 				process_for_drag = false
 				update_set_process()
-				emit_signal("dropped")
+				emit_signal("dropped", card)
 
 func _mouse_entered():
 	interaction_state = InteractionState.HOVER

@@ -24,6 +24,7 @@ Global="*res://Autoload/Global.gd"
 ManaType="*res://Autoload/ManaType.gd"
 CardLocation="*res://Autoload/CardLocation.gd"
 Dpi="*res://Autoload/Dpi.gd"
+TableLocation="*res://Autoload/TableLocation.gd"
 
 [debug]
 
