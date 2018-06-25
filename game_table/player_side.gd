@@ -70,17 +70,18 @@ func get_cards_in(location):
 			cards_found.append(c)
 	return cards_found
 
-
-#please make this understandabel!!!
 func update_tableside():
+	#set up of the bf and hand order for TOP or BOTTOM player_side
 	var end_pos = $right_area.get_child_count() - 1
 	match table_side:
 		TableSide.TOP:
+			#player on TOP side of table so order is: hand_node, bf_node, attack_phase_spacer (from top to bottmo)
 			$right_area.move_child(hand_node, end_pos)
 			$right_area.move_child(bf_node, end_pos)
 			$right_area.move_child(attack_phase_spacer, end_pos)
 			$left_area/Label.text = "Player2"
 		TableSide.BOTTOM:
+			#player on BOTTOM side of table so order is: attack_phase_spacer, bf_node, hand_node (from top to bottmo)
 			$right_area.move_child(attack_phase_spacer, end_pos)
 			$right_area.move_child(bf_node, end_pos)
 			$right_area.move_child(hand_node, end_pos)
