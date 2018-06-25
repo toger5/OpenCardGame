@@ -1,4 +1,4 @@
-extends Panel
+extends Control
 
 enum InteractionState {NONE, HOVER, DRAG}
 
@@ -22,7 +22,7 @@ func _ready():
 	set_process(false)
 	connect("mouse_entered", self, "_mouse_entered")
 	connect("mouse_exited", self, "_mouse_exited")
-	card.connect("tapped_changed", self, "update_tap_status")
+	card.connect("tapped_changed", self, "animate_tapping")
 	card.opponent.bf_node.connect("mouse_entered", self, "_mouse_entered_opponent_bf")
 	card.opponent.bf_node.connect("mouse_exited", self, "_mouse_exited_opponent_bf")
 
@@ -73,6 +73,10 @@ func _timeout():
 
 func _gui_input(event):
 	if event is InputEventMouseButton:
+		if event.pressed and event.button_index == BUTTON_RIGHT:
+			if card.location == CardLocation.BATTLEFIELD:
+				card.tapped = not card.tapped
+				return
 		if event.pressed and event.button_index == BUTTON_LEFT:
 			interaction_state = InteractionState.DRAG
 			process_for_drag = true
@@ -107,15 +111,15 @@ func _mouse_entered():
 
 func _mouse_exited():
 	interaction_state = InteractionState.NONE
-	if not card.casting:
+	if card.location == CardLocation.HAND and not card.casting: 
 		animate_to_holder()
+	if card.location == CardLocation.BATTLEFIELD:
 		card.player.get_parent().hide_card_preview(card)
 
 func animate_card_big():
 	var t_trans = Tween.TRANS_EXPO
 	var t_ease = Tween.EASE_OUT
 	var d = 2
-	
 	var ct = tex_node
 	VisualServer.canvas_item_set_z_index(ct.get_canvas_item(), 4)
 	tween.stop_all()
@@ -128,7 +132,7 @@ func animate_card_big():
 		var margin_temp = m_top
 		m_top = -m_bottom
 		m_bottom = -margin_temp
-		
+	
 	tween.interpolate_property(ct, "margin_top", 0, m_top , d,t_trans,t_ease)
 	tween.interpolate_property(ct, "margin_bottom", 0, m_bottom, d,t_trans,t_ease)
 	tween.interpolate_property(ct, "margin_left", 0, -(si.x +rect_size.x)/2, d,t_trans,t_ease)
@@ -139,6 +143,7 @@ func animate_to_holder():
 	var ct = tex_node
 	VisualServer.canvas_item_set_z_index(ct.get_canvas_item(),3)
 	tween.stop_all()
+#	tween.resume(self, "update_tap_status")
 	var t_trans = Tween.TRANS_BOUNCE
 	var t_ease = Tween.EASE_OUT
 	var d = 0.6
@@ -158,12 +163,22 @@ func update_holder_size():
 		else:
 			rect_min_size.x = get_parent_control().rect_size.y * card_renderer.card_size.aspect()
 
-func update_tap_status():
-	rect_min_size.x += 10
-#	if card.tapped:
-#		var t = 0.3
-#		tween.interpolate_property(self, "rect_min_size:x", rect_min_size.x, get_parent().rect_size.y, t, Tween.TRANS_BOUNCE, Tween.EASE_OUT)
-		
-	
+func animate_tapping():
+#	rect_min_size.x += 10
+	if card.location == CardLocation.BATTLEFIELD:
+		var t = 0.5
+		if card.tapped:
+			tween.interpolate_property(self, "rect_min_size:x", rect_min_size.x, tex_node.rect_size.y, t, Tween.TRANS_ELASTIC, Tween.EASE_OUT)
+			yield(tween, "tween_completed")
+			tex_node.set_pivot_offset(rect_size/2)
+			tween.interpolate_property(tex_node, "rect_rotation", 0, 90, t, Tween.TRANS_EXPO, Tween.EASE_OUT)
+		if not card.tapped:
+			tween.interpolate_property(tex_node, "rect_rotation", 90, 0, t, Tween.TRANS_EXPO, Tween.EASE_OUT)
+			yield(tween, "tween_completed")
+			var old_x = rect_size.x
+			update_holder_size()
+			tween.interpolate_property(self, "rect_min_size:x", rect_size.x, rect_min_size.x, t, Tween.TRANS_BOUNCE, Tween.EASE_OUT)
+		tween.start()
+
 func update_set_process():
 	set_process(process_for_drag or process_for_progressbar)

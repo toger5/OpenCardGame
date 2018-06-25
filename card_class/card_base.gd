@@ -24,7 +24,7 @@ var casting = false
 #environment variables
 var texture_node
 var holder_node setget ,holder_node_get
-var player
+var player #is added in player_side.gd
 var opponent
 var table
 var deck
@@ -59,7 +59,7 @@ func _can_cast():
 func _tapped_changed(new_tap_status):
 	if not new_tap_status == tapped:
 		tapped = new_tap_status
-	emit_signal("tapped_changed")
+		emit_signal("tapped_changed")
 #internal events
 func __location_changed(new_val):
 	location = new_val

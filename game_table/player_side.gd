@@ -40,6 +40,7 @@ func get_available_mana():
 	var av_mana = {}
 	for mt in ManaType.list:
 		av_mana[mt] = 0
+		
 	for c in get_cards_mana_array():
 		if not c.tapped:
 			av_mana[c.mana_type] += 1
@@ -51,15 +52,14 @@ func tap_mana(mana):
 			c.tapped = true
 			m[c.mana_type] -= 1
 	emit_signal("mana_changed", get_available_mana())
+	
+	#get cards from different locations
 func get_cards_hand():
 	return get_cards_in(CardLocation.HAND)
-	
 func get_cards_mana_array():
 	return get_cards_in(CardLocation.MANA)
-	
 func get_cards_graveyard():
 	return get_cards_in(CardLocation.GRAVEYARD)
-	
 func get_cards_battlefield():
 	return get_cards_in(CardLocation.BATTLEFIELD)
 	
@@ -70,6 +70,8 @@ func get_cards_in(location):
 			cards_found.append(c)
 	return cards_found
 
+
+#please make this understandabel!!!
 func update_tableside():
 	var end_pos = $right_area.get_child_count() - 1
 	match table_side:

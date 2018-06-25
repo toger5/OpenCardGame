@@ -1,22 +1,52 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://card_class/holder.gd" type="Script" id=1]
 
-[node name="Panel" type="Panel" index="0"]
+[sub_resource type="StyleBoxFlat" id=1]
+
+content_margin_left = -1.0
+content_margin_right = -1.0
+content_margin_top = -1.0
+content_margin_bottom = -1.0
+bg_color = Color( 0.6, 0.6, 0.6, 1 )
+draw_center = true
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+border_color = Color( 0.8, 0.8, 0.8, 1 )
+border_blend = false
+corner_radius_top_left = 0
+corner_radius_top_right = 0
+corner_radius_bottom_right = 0
+corner_radius_bottom_left = 0
+corner_detail = 8
+expand_margin_left = 0.0
+expand_margin_right = 0.0
+expand_margin_top = 0.0
+expand_margin_bottom = 0.0
+shadow_color = Color( 0, 0, 0, 0.6 )
+shadow_size = 0
+anti_aliasing = true
+anti_aliasing_size = 1
+
+[node name="Control" type="Panel" index="0"]
 anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
+margin_top = 18.8672
 margin_right = 147.0
-margin_bottom = 80.0
+margin_bottom = 98.8672
 rect_pivot_offset = Vector2( 0, 0 )
 rect_clip_content = false
 mouse_filter = 0
 mouse_default_cursor_shape = 0
 size_flags_horizontal = 1
 size_flags_vertical = 3
+custom_styles/panel = SubResource( 1 )
 script = ExtResource( 1 )
-_sections_unfolded = [ "Rect", "Size Flags", "Theme" ]
+_sections_unfolded = [ "Custom Styles", "Rect", "Size Flags", "Theme" ]
 
 [node name="TextureRect" type="TextureRect" parent="." index="0"]
 anchor_left = 0.0
@@ -33,7 +63,7 @@ size_flags_horizontal = 1
 size_flags_vertical = 1
 expand = true
 stretch_mode = 6
-_sections_unfolded = [ "Margin", "Mouse" ]
+_sections_unfolded = [ "Anchor", "Margin", "Mouse" ]
 
 [node name="ProgressBar" type="ProgressBar" parent="TextureRect" index="0"]
 pause_mode = 1

@@ -4,7 +4,7 @@
 [ext_resource path="res://game_table/game_table.gd" type="Script" id=2]
 [ext_resource path="res://game_table/player_side.tscn" type="PackedScene" id=3]
 
-[node name="Control" type="Control"]
+[node name="Control" type="Control" index="0"]
 anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 1.0
@@ -44,9 +44,9 @@ table_side = 0
 
 [node name="player" parent="table" index="1" instance=ExtResource( 3 )]
 margin_left = 0.0
-margin_top = 364.651
+margin_top = 364.0
 margin_right = 1280.0
-margin_bottom = 720.651
+margin_bottom = 720.0
 
 [node name="TextureRect" type="TextureRect" parent="." index="1"]
 anchor_left = 1.0

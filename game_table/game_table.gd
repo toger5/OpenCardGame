@@ -225,6 +225,8 @@ func inactive_player():
 func _input(event):
 		if event is InputEventKey:
 			var card_to_add = card_cache.card(card_cache.get_all_card_names()[randi() % card_cache.get_all_card_names().size()])
+			if event.scancode == KEY_F and event.pressed:
+				player.add_card(card_cache.card("flo"))
 			if event.scancode == KEY_W and event.pressed:
 				player.add_card(card_to_add)
 			if event.scancode == KEY_Q and event.pressed:
@@ -232,9 +234,6 @@ func _input(event):
 			if event.scancode == KEY_R and event.pressed:
 				tw.interpolate_property(player.bf_h_box, "margin_bottom", 0, -100, 4,Tween.TRANS_LINEAR,Tween.EASE_OUT)
 				
-			#debugigng
-			if event.pressed and event.scancode == KEY_T:
-				player.get_cards_battlefield()[0].tapped = true
 				
 				
 #		elif event is InputEventMouseButton:
