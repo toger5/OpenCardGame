@@ -1,16 +1,21 @@
 extends Panel
 
+enum InteractionState {NONE, HOVER, DRAG}
+
 onready var progress = $TextureRect/ProgressBar
+onready var tex_node = $TextureRect
+onready var tween = $Tween
+
 var timer setget set_timer
 var card
 var drag_offset = Vector2()
 var drag_offset_factor = 1
 
+#state and helper vars
+var interaction_state = InteractionState.NONE
+var is_indication_label_shown = false
 var process_for_drag = false
 var process_for_progressbar = false
-onready var tex_node = $TextureRect
-onready var tween = $Tween
-
 signal dropped
 
 func _ready():
@@ -18,16 +23,33 @@ func _ready():
 	connect("mouse_entered", self, "_mouse_entered")
 	connect("mouse_exited", self, "_mouse_exited")
 	card.connect("tapped_changed", self, "update_tap_status")
-	
+	card.opponent.bf_node.connect("mouse_entered", self, "_mouse_entered_opponent_bf")
+	card.opponent.bf_node.connect("mouse_exited", self, "_mouse_exited_opponent_bf")
 
 func _process(delta):
 	print("process of card_node aka: the all mighty \"holder\"...")
 	if timer:
 		progress.value = 1 - timer.time_left / timer.wait_time
-	if card.interaction_state == card.CardInteractionState.DRAG:
+	if interaction_state == InteractionState.DRAG:
 		drag_offset_factor = max(0,(drag_offset_factor * 0.8) - delta)
 		tex_node.rect_global_position = (get_global_mouse_position() - tex_node.rect_size/2) + drag_offset * drag_offset_factor
-
+		
+		if card.location == CardLocation.BATTLEFIELD:
+			#check if over opponent area
+			var g_table = Global.game_table
+			var TLoc = g_table.TableLocation
+			var current_table_loc = g_table.mouse_over()
+			
+			var OPPONENT_BF = TLoc.TOP_BF
+			if card.player.table_side == card.player.TableSide.TOP:
+				OPPONENT_BF = TLoc.BOTTOM_BF
+			
+			if current_table_loc == OPPONENT_BF and not is_indication_label_shown:
+				Global.game_table.indicate_attack_phase(true, 2) #true: indicate with gap, true: for without label
+				is_indication_label_shown = true
+			elif current_table_loc != OPPONENT_BF and is_indication_label_shown:
+				Global.game_table.indicate_attack_phase(true, 1) #true: indicate with gap, false: for without label
+				is_indication_label_shown = false
 func _enter_tree():
 	get_parent().connect("resized", self, "update_holder_size")
 	update_holder_size()
@@ -52,7 +74,7 @@ func _timeout():
 func _gui_input(event):
 	if event is InputEventMouseButton:
 		if event.pressed and event.button_index == BUTTON_LEFT:
-			card.interaction_state = card.CardInteractionState.DRAG
+			interaction_state = InteractionState.DRAG
 			process_for_drag = true
 			update_set_process()
 			VisualServer.canvas_item_set_z_index(tex_node.get_canvas_item(),2)
@@ -60,24 +82,31 @@ func _gui_input(event):
 			drag_offset_factor = 1
 			tween.stop(tex_node)
 			tween.interpolate_property(tex_node, "rect_size", tex_node.rect_size, Vector2(tex_node.texture.get_width(), tex_node.texture.get_height())*card.player.DRAG_SIZE_HIGHT/tex_node.texture.get_height(), 0.8, Tween.TRANS_LINEAR, Tween.EASE_IN)
+			if card.location == CardLocation.BATTLEFIELD:
+				Global.game_table.indicate_attack_phase(true, 1) #true: indicate with gap, false: for without label
 			
 func _input(event):
 	if event is InputEventMouseButton:
 		if not event.pressed and event.button_index == BUTTON_LEFT:
-			if card.interaction_state == card.CardInteractionState.DRAG:
+			if interaction_state == InteractionState.DRAG:
+				if card.location == CardLocation.BATTLEFIELD:
+					if is_indication_label_shown:
+						Global.game_table.start_attack_phase()
+					else:
+						Global.game_table.indicate_attack_phase(false, 0) # #false: indicate with gap, false: for without label
 				process_for_drag = false
 				update_set_process()
 				emit_signal("dropped")
 
 func _mouse_entered():
-	card.interaction_state = card.CardInteractionState.HOVER
+	interaction_state = InteractionState.HOVER
 	if card.location == CardLocation.HAND and not card.casting: 
 		animate_card_big()
 	if card.location == CardLocation.BATTLEFIELD:
 		card.player.get_parent().show_card_preview(card)
 
 func _mouse_exited():
-	card.interaction_state = card.CardInteractionState.NONE
+	interaction_state = InteractionState.NONE
 	if not card.casting:
 		animate_to_holder()
 		card.player.get_parent().hide_card_preview(card)

@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://game_table/player_side.gd" type="Script" id=1]
 [ext_resource path="res://game_table/mana_control.tscn" type="PackedScene" id=2]
+[ext_resource path="res://Font/Arial.ttf" type="DynamicFontData" id=3]
 
 [sub_resource type="StyleBoxFlat" id=1]
 
@@ -31,6 +32,15 @@ shadow_size = 12
 anti_aliasing = true
 anti_aliasing_size = 1
 _sections_unfolded = [ "Border", "Border Width", "Corner Radius", "Shadow" ]
+
+[sub_resource type="DynamicFont" id=2]
+
+size = 80
+outline_size = 0
+outline_color = Color( 1, 1, 1, 1 )
+use_mipmaps = false
+use_filter = false
+font_data = ExtResource( 3 )
 
 [node name="Player" type="HBoxContainer" index="0"]
 anchor_left = 0.0
@@ -183,13 +193,27 @@ size_flags_stretch_ratio = 4.0
 alignment = 0
 _sections_unfolded = [ "Size Flags" ]
 
-[node name="hand" type="Panel" parent="right_area" index="0"]
+[node name="attack_phase_spacer" type="Control" parent="right_area" index="0"]
 anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
 margin_right = 1530.0
-margin_bottom = 220.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 0
+mouse_default_cursor_shape = 0
+size_flags_horizontal = 1
+size_flags_vertical = 1
+
+[node name="hand" type="Panel" parent="right_area" index="1"]
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_top = 8.0
+margin_right = 1530.0
+margin_bottom = 228.0
 rect_min_size = Vector2( 0, 220 )
 rect_pivot_offset = Vector2( 0, 0 )
 rect_clip_content = false
@@ -219,12 +243,12 @@ custom_constants/separation = 13
 alignment = 1
 _sections_unfolded = [ "Anchor", "Custom Constants", "Grow Direction", "Margin", "Rect", "Size Flags" ]
 
-[node name="bf" type="Panel" parent="right_area" index="1"]
+[node name="bf" type="Panel" parent="right_area" index="2"]
 anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_top = 228.0
+margin_top = 236.0
 margin_right = 1530.0
 margin_bottom = 516.0
 rect_pivot_offset = Vector2( 0, 0 )
@@ -254,6 +278,44 @@ size_flags_horizontal = 1
 size_flags_vertical = 1
 alignment = 1
 _sections_unfolded = [ "Anchor", "Grow Direction", "Margin", "Rect" ]
+
+[node name="attack_overlay" type="Label" parent="right_area/bf" index="1"]
+self_modulate = Color( 1, 1, 1, 0 )
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 2
+mouse_default_cursor_shape = 0
+size_flags_horizontal = 1
+size_flags_vertical = 4
+custom_fonts/font = SubResource( 2 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+text = "Start Attack Phase"
+align = 1
+valign = 1
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+_sections_unfolded = [ "Custom Colors", "Custom Constants", "Mouse", "Visibility", "custom_fonts/font" ]
+
+[node name="attack_overlay_bg" type="ColorRect" parent="right_area/bf/attack_overlay" index="0"]
+self_modulate = Color( 1, 1, 1, 0 )
+show_behind_parent = true
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 2
+mouse_default_cursor_shape = 0
+size_flags_horizontal = 1
+size_flags_vertical = 1
+color = Color( 1, 1, 1, 1 )
+_sections_unfolded = [ "Mouse", "Visibility" ]
 
 [connection signal="gui_input" from="left_area/deck" to="." method="_on_deck_gui_input"]
 [connection signal="pressed" from="left_area/FinishTurnButton" to="." method="_on_FinishTurnButton_pressed"]

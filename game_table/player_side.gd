@@ -9,7 +9,9 @@ onready var bf_h_box = $right_area/bf/HBoxContainer
 onready var hand_h_box = $right_area/hand/HBoxContainer
 onready var v_box = $right_area
 onready var name_label = $left_area/Label
-
+onready var attack_phase_spacer = $right_area/attack_phase_spacer
+onready var attack_overlay = $right_area/bf/attack_overlay
+onready var attack_overlay_bg = $right_area/bf/attack_overlay/attack_overlay_bg
 var BF_CARD_HEIGHT = 350
 var DRAG_SIZE_HIGHT = 300
 
@@ -69,15 +71,28 @@ func get_cards_in(location):
 	return cards_found
 
 func update_tableside():
-	print(table_side)
+	var end_pos = $right_area.get_child_count() - 1
 	match table_side:
 		TableSide.TOP:
-			$right_area.move_child(hand_node, 0)
+			$right_area.move_child(hand_node, end_pos)
+			$right_area.move_child(bf_node, end_pos)
+			$right_area.move_child(attack_phase_spacer, end_pos)
 			$left_area/Label.text = "Player2"
 		TableSide.BOTTOM:
-			$right_area.move_child(bf_node, 0)
+			$right_area.move_child(attack_phase_spacer, end_pos)
+			$right_area.move_child(bf_node, end_pos)
+			$right_area.move_child(hand_node, end_pos)
 			$left_area/Label.text = "Player1"
 	hand_node.rect_min_size.y = get_tree().get_root().size.y / 2 / 3
+
+func show_attack_indicate_label(opacity_lbl, opcity_bg):
+	Global.game_table.tw.interpolate_property(attack_overlay, "self_modulate:a",
+		attack_overlay.self_modulate.a, opacity_lbl,
+		0.2, Tween.EASE_IN, Tween.TRANS_LINEAR)
+	Global.game_table.tw.interpolate_property(attack_overlay_bg, "self_modulate:a",
+		attack_overlay_bg.self_modulate.a, opcity_bg, 
+		0.2, Tween.EASE_IN, Tween.TRANS_LINEAR)
+
 
 func _on_deck_gui_input(event):
 	#draw card

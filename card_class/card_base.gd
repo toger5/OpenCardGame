@@ -1,7 +1,6 @@
 extends Object
 
 enum CardType {INSTANT, SORCERY, CREATURE, LAND, ENCHANTMENT, ARTIFACT, PLANESWALKER}
-enum CardInteractionState {NONE, HOVER, DRAG} #TODO Renae to InteractionState
 
 signal casted(card)
 signal location_changed(card)
@@ -21,7 +20,6 @@ var location = null setget __location_changed#CardLocation
 var tapped = false setget _tapped_changed
 var casted = false
 var casting = false
-var interaction_state = CardInteractionState.NONE
 
 #environment variables
 var texture_node
@@ -66,6 +64,18 @@ func _tapped_changed(new_tap_status):
 func __location_changed(new_val):
 	location = new_val
 	emit_signal("location_changed", self)
+
+func _on_drop_to_cast():
+	match location:
+		CardLocation.HAND:
+			if Global.game_table.mouse_over_cast_area() and player.can_cast(self) and _can_cast() and can_cast_mana():
+				player.tap_mana(mana_cost)
+				player.get_parent().queue_cast_card(self)
+			else:
+				holder_node.animate_to_holder()
+		CardLocation.BATTLEFIELD:
+			Global.game_table
+			holder_node.animate_to_holder()
 
 #helper functions
 func update_tex():
@@ -119,15 +129,3 @@ func can_cast_mana():
 		if mana_cost[t] > mana[t]:
 			return false
 	return true
-
-func _on_drop_to_cast():
-	match location:
-		CardLocation.HAND:
-			if player.get_parent().mouse_over_cast_area() and player.can_cast(self) and _can_cast() and can_cast_mana():
-				player.tap_mana(mana_cost)
-				player.get_parent().queue_cast_card(self)
-			else:
-				holder_node.animate_to_holder()
-		CardLocation.BATTLEFIELD:
-			holder_node.animate_to_holder()
-

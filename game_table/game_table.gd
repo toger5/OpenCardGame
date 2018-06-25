@@ -1,6 +1,6 @@
 extends Control
 
-enum TableLocation {BF, HAND, GRAVEYARD, DECK, OPPONENT_HAND, OPPONENT_BF}
+enum TableLocation {BOTTOM_BF, BOTTOM_HAND, GRAVEYARD, DECK, TOP_HAND, TOP_BF}
 
 signal cast_finished
 
@@ -20,7 +20,7 @@ var drag_offset_factor = 1
 #var hovered_card = null
 
 var cast_queue = []
-
+var attack_phase = false
 func _ready():
 	add_child(tw)
 	setup_game()
@@ -98,7 +98,7 @@ func queue_cast_card(card):
 	if not cast_queue.empty():
 		cast_queue.front().timer.paused = true
 	cast_queue.push_front(card)
-	card.start_cast_timer(current_turn_player().cast_wait_time)
+	card.start_cast_timer(active_player().cast_wait_time)
 
 	yield(card.timer, "timeout")
 	card._cast()
@@ -167,11 +167,60 @@ func _turn_finished():
 	opponent.is_playing = player.is_playing
 	player.is_playing = not player.is_playing
 
-func current_turn_player():
+#Attack Phase
+func indicate_attack_phase(indicate, label_stage = 0):
+	if attack_phase:
+		return
+	var attack_indicate_height = 20
+	if not indicate:
+		attack_indicate_height = 0
+	for p in [opponent, player]:
+		var spacer = p.attack_phase_spacer
+		var d = 0.17
+		tw.interpolate_property(spacer, "rect_min_size:y", spacer.rect_size.y, attack_indicate_height, d, Tween.TRANS_EXPO, Tween.EASE_OUT)
+
+	var bg_opacity = 0
+	var lbl_opacity = 0
+	if indicate:
+		match label_stage:
+			1:
+				lbl_opacity = 0.2
+				bg_opacity = 0.3
+			2:
+				lbl_opacity = 0.6
+				bg_opacity = 0.4
+	inactive_player().show_attack_indicate_label(lbl_opacity, bg_opacity)
+
+func start_attack_phase():
+	if attack_phase:
+		return
+	attack_phase = true
+	var attack_phase_height = Dpi.screen_size.y/10
+	inactive_player().show_attack_indicate_label(0,0)
+	for p in [opponent, player]:
+		var d = 0.2
+		tw.interpolate_property(p.attack_phase_spacer, "rect_min_size:y", p.attack_phase_spacer.rect_size.y, attack_phase_height, d, Tween.TRANS_EXPO, Tween.EASE_IN)
+
+func end_attack_phase():
+	if not attack_phase:
+		return
+	attack_phase = false
+	inactive_player().hide_attack_indicate_label()
+	for p in [opponent, player]:
+		var d = 0.2
+		tw.interpolate_property(p.attack_phase_spacer, "rect_min_size:y", p.attack_phase_spacer.rect_size.y, 0, d, Tween.TRANS_EXPO, Tween.EASE_IN)
+
+func active_player():
 	if opponent.is_playing:
 		return opponent
 	elif player.is_playing:
 		return player
+
+func inactive_player():
+	if opponent.is_playing:
+		return player
+	elif player.is_playing:
+		return opponent
 
 func _input(event):
 		if event is InputEventKey:
@@ -213,18 +262,18 @@ func mouse_over():
 	var mo
 	var mp = get_global_mouse_position()
 	if player.hand_node.get_global_rect().has_point(mp):
-		mo = TableLocation.HAND
+		mo = TableLocation.BOTTOM_HAND
 	elif player.bf_node.get_global_rect().has_point(mp):
-		mo = TableLocation.BF
+		mo = TableLocation.BOTTOM_BF
 	elif opponent.hand_node.get_global_rect().has_point(mp):
-		mo = TableLocation.OPPONENT_HAND
+		mo = TableLocation.TOP_HAND
 	elif opponent.bf_node.get_global_rect().has_point(mp):
-		mo = TableLocation.OPPONENT_BF
+		mo = TableLocation.TOP_BF
 	return mo
 
 func mouse_over_cast_area():
 	var mo = mouse_over()
-	return mo == BF or mo == OPPONENT_BF
+	return mo == TOP_BF or mo == BOTTOM_BF
 #func card_under_mouse():
 #	var mp = get_global_mouse_position()
 #	var over = null
