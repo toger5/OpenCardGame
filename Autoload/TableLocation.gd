@@ -1,6 +1,6 @@
 extends Node
 
-enum {BOTTOM_BF, BOTTOM_HAND, GRAVEYARD, DECK, TOP_HAND, TOP_BF}
+enum {BOTTOM_BF, BOTTOM_HAND, GRAVEYARD, DECK, TOP_HAND, TOP_BF, ATTACK_SPACE}
 
 func mouse_pos():
 	var mo
@@ -13,6 +13,8 @@ func mouse_pos():
 		mo = TableLocation.TOP_HAND
 	elif Global.game_table.opponent.bf_node.get_global_rect().has_point(mp):
 		mo = TableLocation.TOP_BF
+	elif Global.game_table.player.attack_phase_spacer.get_global_rect().has_point(mp) or Global.game_table.opponent.attack_phase_spacer.get_global_rect().has_point(mp):
+		mo = TableLocation.ATTACK_SPACE
 	return mo
 
 func mouse_over_cast_area():

@@ -10,6 +10,7 @@ onready var hand_h_box = $right_area/hand/HBoxContainer
 onready var v_box = $right_area
 onready var name_label = $left_area/Label
 onready var attack_phase_spacer = $right_area/attack_phase_spacer
+onready var attack_h_box = $right_area/bf/attack_h_box
 onready var attack_overlay = $right_area/bf/attack_overlay
 onready var attack_overlay_bg = $right_area/bf/attack_overlay/attack_overlay_bg
 var BF_CARD_HEIGHT = 350
@@ -38,7 +39,7 @@ func _ready():
 	attack_overlay.get_font("font").size = Dpi.cm_to_pixel(0.6)
 	for t in ManaType.list:
 		mana_temp[t] = 0
-		
+
 func update_tableside():
 	#set up of the bf and hand order for TOP or BOTTOM player_side
 	var end_pos = $right_area.get_child_count() - 1
@@ -49,15 +50,19 @@ func update_tableside():
 			$right_area.move_child(bf_node, end_pos)
 			$right_area.move_child(attack_phase_spacer, end_pos)
 			$left_area/Label.text = "Player2"
+			attack_h_box.set_anchors_and_margins_preset(Control.PRESET_BOTTOM_WIDE)
 		TableSide.BOTTOM:
 			#player on BOTTOM side of table so order is: attack_phase_spacer, bf_node, hand_node (from top to bottmo)
 			$right_area.move_child(attack_phase_spacer, end_pos)
 			$right_area.move_child(bf_node, end_pos)
 			$right_area.move_child(hand_node, end_pos)
 			$left_area/Label.text = "Player1"
+			attack_h_box.set_anchors_and_margins_preset(Control.PRESET_TOP_WIDE)
+	attack_h_box.margin_top = -Dpi.ATTACK_SPACER_HEIGHT
+	attack_h_box.margin_bottom = Dpi.ATTACK_SPACER_HEIGHT / 3
+	VisualServer.canvas_item_set_z_index(attack_h_box.get_canvas_item(),10)
 	hand_node.rect_min_size.y = get_tree().get_root().size.y / 2 / 3
-	
-	
+
 #MANA
 func get_available_mana():
 	var av_mana = {}
@@ -80,6 +85,34 @@ func tap_mana(mana):
 
 
 #ATTACK ui-anim's
+
+
+func indicate_attack_phase(indicate, label_stage = 0):
+	#Label opacity
+	var bg_opacity = 0
+	var lbl_opacity = 0
+	if indicate:
+		match label_stage:
+			1:
+				lbl_opacity = 0.2
+				bg_opacity = 0.3
+			2:
+				lbl_opacity = 0.6
+				bg_opacity = 0.4
+	get_opponent().show_attack_indicate_label(lbl_opacity, bg_opacity)
+	
+	#skip resizing of attack area when alerady in attack phase (phase need to be changed before the next anim)
+	if Global.game_table.phase == Global.game_table.GamePhase.ATTACK:
+		return
+	var attack_indicate_height = 20
+	if not indicate:
+		attack_indicate_height = 0
+	for p in [get_opponent(), self]:
+		var spacer = p.attack_phase_spacer
+		var d = 0.17
+		Global.game_table.tw.interpolate_property(spacer, "rect_min_size:y", spacer.rect_size.y, attack_indicate_height, d, Tween.TRANS_EXPO, Tween.EASE_OUT)
+
+
 func show_attack_indicate_label(opacity_lbl, opcity_bg):
 	Global.game_table.tw.interpolate_property(attack_overlay, "self_modulate:a",
 		attack_overlay.self_modulate.a, opacity_lbl,
@@ -88,6 +121,13 @@ func show_attack_indicate_label(opacity_lbl, opcity_bg):
 		attack_overlay_bg.self_modulate.a, opcity_bg, 
 		0.2, Tween.EASE_IN, Tween.TRANS_LINEAR)
 
+func animate_attack(to_attack):
+		var d = 0.2
+		var attack_spacer_height = 200 #TODO DPI
+		if not to_attack:
+			attack_spacer_height = 0
+		Global.game_table.tw.interpolate_property(attack_phase_spacer, "rect_min_size:y", attack_phase_spacer.rect_size.y, attack_spacer_height, d, 
+			Tween.TRANS_EXPO, Tween.EASE_IN)
 
 #DRAW CARD
 func _on_deck_gui_input(event):
@@ -124,17 +164,31 @@ func _card_dropped(card):
 	match card.location:
 		CardLocation.HAND:
 			#cast
-			if TableLocation.mouse_over_cast_area() and card._can_cast() and can_cast_enough_mana(card):
-				tap_mana(card.mana_cost)
-				Global.game_table.queue_cast_card(card)
+			if (Global.game_table.is_casting() and can_cast_phase()) or is_playing: #you can always cast a card to react to another one
+				if TableLocation.mouse_over_cast_area() and card._can_cast() and can_cast_enough_mana(card):
+					tap_mana(card.mana_cost)
+					Global.game_table.queue_cast_card(card)
+				else:
+					card.holder_node.animate_to_holder()
 			else:
 				card.holder_node.animate_to_holder()
 		CardLocation.BATTLEFIELD:
-			if TableLocation.mouse_pos() == TableLocation.opponent_bf(self):
-				Global.game_table.start_attack_phase()
-			else:
-				indicate_attack_phase(false, 0) # #false: indicate with gap, false: for without label
-			card.holder_node.animate_to_holder()
+			match Global.game_table.phase:
+				Global.game_table.GamePhase.ATTACK:
+					if TableLocation.mouse_pos() == TableLocation.ATTACK_SPACE:
+						card.move_to(attack_h_box)
+					else:
+						card.holder_node.animate_to_holder()
+				Global.game_table.GamePhase.DEFAULT:
+					if is_playing:
+						if TableLocation.mouse_pos() == TableLocation.opponent_bf(self):
+							Global.game_table.start_attack_phase()
+							card.move_to(attack_h_box)
+						else:
+							card.holder_node.animate_to_holder()
+							indicate_attack_phase(false, 0) # #false: indicate with gap, false: for without label
+					else: #deafault phase but not playing
+						card.holder_node.animate_to_holder()
 
 func can_cast_enough_mana(card):
 	var mana = get_available_mana()
@@ -142,29 +196,10 @@ func can_cast_enough_mana(card):
 		if card.mana_cost[t] > mana[t]:
 			return false
 	return true
-
-func indicate_attack_phase(indicate, label_stage = 0):
-	if Global.game_table.attack_phase:
-		return
-	var attack_indicate_height = 20
-	if not indicate:
-		attack_indicate_height = 0
-	for p in [get_opponent(), self]:
-		var spacer = p.attack_phase_spacer
-		var d = 0.17
-		Global.game_table.tw.interpolate_property(spacer, "rect_min_size:y", spacer.rect_size.y, attack_indicate_height, d, Tween.TRANS_EXPO, Tween.EASE_OUT)
-
-	var bg_opacity = 0
-	var lbl_opacity = 0
-	if indicate:
-		match label_stage:
-			1:
-				lbl_opacity = 0.2
-				bg_opacity = 0.3
-			2:
-				lbl_opacity = 0.6
-				bg_opacity = 0.4
-	get_opponent().show_attack_indicate_label(lbl_opacity, bg_opacity)
+func can_cast_phase(card):
+	if card.type == card.CardType.INSTANT: #TODO maybe we need to add more types here?
+		return true
+	return false
 #Events
 func _card_location_changed(card):
 	if card.location == CardLocation.MANA:

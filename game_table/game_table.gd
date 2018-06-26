@@ -18,7 +18,10 @@ var drag_offset_factor = 1
 #var hovered_card = null
 
 var cast_queue = []
-var attack_phase = false
+func is_casting(): return not cast_queue.empty()
+enum GamePhase {DEFAULT, DEFALT, ATTACK, DEFEND, NO_INTERACTION} #NO_INTERACTION is used for mana reload phase + attack execute phase (they should still be short and with fast animations)
+var phase = GamePhase.DEFAULT
+
 func _ready():
 	add_child(tw)
 	setup_game()
@@ -35,11 +38,7 @@ func setup_game():
 	opponent.cardnames_deck = [ "mana_blue", "flo","a", "b", "mana_red", "mana_blue"]
 
 func queue_cast_card(card):
-#	for c in cast_queue:
-#		c.timer.pause()
-	if cast_queue.empty() or card.type == card.CardType.INSTANT:
-		pass
-	else:
+	if not (cast_queue.empty() or card.type == card.CardType.INSTANT): #das kann glaube ich weg. da es jetzt im player gehandled wird
 		return
 	if not cast_queue.empty():
 		cast_queue.front().timer.paused = true
@@ -47,7 +46,10 @@ func queue_cast_card(card):
 	card.start_cast_timer(active_player().cast_wait_time)
 
 	yield(card.timer, "timeout")
+
 	card._cast()
+	if not card.casted:
+		yield(card, "casted")
 	cast_queue.pop_front()
 	if not cast_queue.empty():
 		cast_queue.front().timer.paused = false
@@ -70,13 +72,7 @@ func queue_cast_card(card):
 		card.location = CardLocation.GRAVEYARD
 		card.holder_node.get_parent().remove_child(card.holder_node)
 	if move_to_h_box:
-		var tex_global_rect = card.texture_node.get_global_rect()
-		card.holder_node.get_parent().remove_child(card.holder_node)
-		move_to_h_box.add_child(card.holder_node)
-		yield(move_to_h_box, "sort_children")
-		card.texture_node.rect_global_position = tex_global_rect.position
-		card.texture_node.rect_size = tex_global_rect.size
-		card.holder_node.animate_to_holder()
+		card.move_to(move_to_h_box)
 
 func show_card_preview(card):
 	card_preview_tr.texture = card.texture_node.texture
@@ -94,23 +90,20 @@ func _turn_finished():
 #Attack Phase
 
 func start_attack_phase():
-	if attack_phase:
+	if phase == GamePhase.ATTACK:
 		return
-	attack_phase = true
-	var attack_phase_height = Dpi.screen_size.y/10
-	inactive_player().show_attack_indicate_label(0,0)
+	active_player().indicate_attack_phase(false,0)
+	phase = GamePhase.ATTACK
 	for p in [opponent, player]:
-		var d = 0.2
-		tw.interpolate_property(p.attack_phase_spacer, "rect_min_size:y", p.attack_phase_spacer.rect_size.y, attack_phase_height, d, Tween.TRANS_EXPO, Tween.EASE_IN)
+		p.animate_attack(true)
 
 func end_attack_phase():
-	if not attack_phase:
+	if phase != GamePhase.ATTACK: #and phase != GamePhase.NO_INTERACTION: #(I think this is not needed)
 		return
-	attack_phase = false
-	inactive_player().hide_attack_indicate_label()
+	phase = GamePhase.DEFAULT
+	active_player().indicate_attack_phase(false,0)
 	for p in [opponent, player]:
-		var d = 0.2
-		tw.interpolate_property(p.attack_phase_spacer, "rect_min_size:y", p.attack_phase_spacer.rect_size.y, 0, d, Tween.TRANS_EXPO, Tween.EASE_IN)
+		animate_attack(false)
 
 func active_player():
 	if opponent.is_playing:
@@ -128,11 +121,11 @@ func _input(event):
 		if event is InputEventKey:
 			var card_to_add = card_cache.card(card_cache.get_all_card_names()[randi() % card_cache.get_all_card_names().size()])
 			if event.scancode == KEY_F and event.pressed:
-				player.add_card(card_cache.card("flo"))
+				player.add_card_to_hand(card_cache.card("flo"))
 			if event.scancode == KEY_W and event.pressed:
-				player.add_card(card_to_add)
+				player.add_card_to_hand(card_to_add)
 			if event.scancode == KEY_Q and event.pressed:
-				opponent.add_card(card_to_add)
+				opponent.add_card_to_hand(card_to_add)
 			if event.scancode == KEY_R and event.pressed:
 				tw.interpolate_property(player.bf_h_box, "margin_bottom", 0, -100, 4,Tween.TRANS_LINEAR,Tween.EASE_OUT)
 

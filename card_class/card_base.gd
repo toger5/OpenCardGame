@@ -114,3 +114,12 @@ func start_cast_timer(wait_time):
 	yield(timer, "timeout")
 	casting = false
 	VisualServer.canvas_item_set_z_index(texture_node.get_canvas_item(),0)
+
+func move_to(h_box):
+	var tex_global_rect = texture_node.get_global_rect()
+	holder_node.get_parent().remove_child(holder_node)
+	h_box.add_child(holder_node)
+	yield(h_box, "sort_children")
+	texture_node.rect_global_position = tex_global_rect.position
+	texture_node.rect_size = tex_global_rect.size
+	holder_node.animate_to_holder()

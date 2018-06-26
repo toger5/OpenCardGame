@@ -207,6 +207,7 @@ size_flags_horizontal = 1
 size_flags_vertical = 1
 
 [node name="hand" type="Panel" parent="right_area" index="1"]
+editor/display_folded = true
 anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
@@ -280,6 +281,7 @@ alignment = 1
 _sections_unfolded = [ "Anchor", "Grow Direction", "Margin", "Rect" ]
 
 [node name="attack_overlay" type="Label" parent="right_area/bf" index="1"]
+editor/display_folded = true
 self_modulate = Color( 1, 1, 1, 0 )
 anchor_left = 0.0
 anchor_top = 0.0
@@ -316,6 +318,19 @@ size_flags_horizontal = 1
 size_flags_vertical = 1
 color = Color( 1, 1, 1, 1 )
 _sections_unfolded = [ "Mouse", "Visibility" ]
+
+[node name="attack_h_box" type="HBoxContainer" parent="right_area/bf" index="2"]
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 1
+mouse_default_cursor_shape = 0
+size_flags_horizontal = 1
+size_flags_vertical = 1
+alignment = 1
 
 [connection signal="gui_input" from="left_area/deck" to="." method="_on_deck_gui_input"]
 [connection signal="pressed" from="left_area/FinishTurnButton" to="." method="_on_FinishTurnButton_pressed"]

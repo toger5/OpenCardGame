@@ -24,11 +24,11 @@ func _ready():
 	connect("mouse_entered", self, "_mouse_entered")
 	connect("mouse_exited", self, "_mouse_exited")
 	card.connect("tapped_changed", self, "animate_tapping")
-	card.opponent.bf_node.connect("mouse_entered", self, "_mouse_entered_opponent_bf")
-	card.opponent.bf_node.connect("mouse_exited", self, "_mouse_exited_opponent_bf")
 
 func _process(delta):
-	print("process of card_node aka: the all mighty \"holder\"...")
+#	if not (process_for_drag or process_for_progressbar):
+#		return
+	print("process of card_node aka: the all mighty \"holder\"...  this print is there so we can see if process is runnign although it hsouldnt")
 	if timer:
 		progress.value = 1 - timer.time_left / timer.wait_time
 	if interaction_state == InteractionState.DRAG:
@@ -37,16 +37,15 @@ func _process(delta):
 		
 		if card.location == CardLocation.BATTLEFIELD:
 			#check if over opponent area
-			var g_table = Global.game_table
 			var current_table_loc = TableLocation.mouse_pos()
 			
 			var OPPONENT_BF = TableLocation.opponent_bf(card.player)
 			
 			if current_table_loc == OPPONENT_BF and not is_indication_label_shown:
-				card.player.indicate_attack_phase(true, 2) #true: indicate with gap, true: for without label
+				card.player.indicate_attack_phase(true, 2) #true: indicate with gap, 2: with high contrast label
 				is_indication_label_shown = true
 			elif current_table_loc != OPPONENT_BF and is_indication_label_shown:
-				card.player.indicate_attack_phase(true, 1) #true: indicate with gap, false: for without label
+				card.player.indicate_attack_phase(true, 1) #true: indicate with gap, 1: for low contrast lable
 				is_indication_label_shown = false
 
 func _enter_tree():
@@ -85,13 +84,14 @@ func _gui_input(event):
 			drag_offset_factor = 1
 			tween.stop(tex_node)
 			tween.interpolate_property(tex_node, "rect_size", tex_node.rect_size, Vector2(tex_node.texture.get_width(), tex_node.texture.get_height())*card.player.DRAG_SIZE_HIGHT/tex_node.texture.get_height(), 0.8, Tween.TRANS_LINEAR, Tween.EASE_IN)
-			card.player.indicate_attack_phase(true, 1)
-
+			if card.location == CardLocation.BATTLEFIELD:
+				card.player.indicate_attack_phase(true, 1)
 func _input(event):
 	if event is InputEventMouseButton:
 		if not event.pressed and event.button_index == BUTTON_LEFT:
 			if interaction_state == InteractionState.DRAG:
 				process_for_drag = false
+				interaction_state == InteractionState.NONE
 				update_set_process()
 				emit_signal("dropped", card)
 
