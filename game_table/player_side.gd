@@ -19,19 +19,15 @@ var DRAG_SIZE_HIGHT = 300
 signal mana_changed(mana)
 signal card_added(card)
 signal turn_finished
+signal cast_finished
 
-var cast_wait_time = 0.5
+export var cast_wait_time = 0.5
 var is_playing setget _turn_changed
 var mana_temp = {}
 var cardnames_deck = []
 var cards_in_game = []
+var cast_queue = []
 
-#var cards_hand = []  setget ,get_cards_hand
-#var cards_mana_array = [] setget ,get_cards_mana_array
-#var cards_graveyard = [] setget ,get_cards_graveyard
-#var cards_battlefield = [] setget ,get_cards_battlefield
-
-#var mana setget ,get_available_mana
 
 func _ready():
 	update_tableside()
@@ -39,7 +35,24 @@ func _ready():
 	attack_overlay.get_font("font").size = Dpi.cm_to_pixel(0.6)
 	for t in ManaType.list:
 		mana_temp[t] = 0
-
+#Mana
+func get_available_mana():
+	var av_mana = {}
+	for mt in ManaType.list:
+		av_mana[mt] = 0
+		
+	for c in get_cards_mana_array():
+		if not c.tapped:
+			av_mana[c.mana_type] += 1
+	return av_mana
+func tap_mana(mana):
+	var m = mana
+	for c in get_cards_mana_array():
+		if m[c.mana_type] > 0:
+			c.tapped = true
+			m[c.mana_type] -= 1
+	emit_signal("mana_changed", get_available_mana())
+	
 func update_tableside():
 	#set up of the bf and hand order for TOP or BOTTOM player_side
 	var end_pos = $right_area.get_child_count() - 1
@@ -62,31 +75,8 @@ func update_tableside():
 	attack_h_box.margin_bottom = Dpi.ATTACK_SPACER_HEIGHT / 3
 	VisualServer.canvas_item_set_z_index(attack_h_box.get_canvas_item(),10)
 	hand_node.rect_min_size.y = get_tree().get_root().size.y / 2 / 3
-
-#MANA
-func get_available_mana():
-	var av_mana = {}
-	for mt in ManaType.list:
-		av_mana[mt] = 0
-		
-	for c in get_cards_mana_array():
-		if not c.tapped:
-			av_mana[c.mana_type] += 1
-	return av_mana
-
-func tap_mana(mana):
-	var m = mana
-	for c in get_cards_mana_array():
-		if m[c.mana_type] > 0:
-			c.tapped = true
-			m[c.mana_type] -= 1
-	emit_signal("mana_changed", get_available_mana())
-
-
-
+	
 #ATTACK ui-anim's
-
-
 func indicate_attack_phase(indicate, label_stage = 0):
 	#Label opacity
 	var bg_opacity = 0
@@ -134,7 +124,8 @@ func _on_deck_gui_input(event):
 	if event is InputEventMouseButton:
 		if event.pressed and event.button_index == BUTTON_LEFT and is_playing:
 			draw_card()
-
+			
+#drawing a card
 func draw_card():
 	if not cardnames_deck.empty():
 		add_card_to_hand(card_cache.card(cardnames_deck.pop_front()) )
@@ -164,10 +155,11 @@ func _card_dropped(card):
 	match card.location:
 		CardLocation.HAND:
 			#cast
-			if (Global.game_table.is_casting() and can_cast_phase()) or is_playing: #you can always cast a card to react to another one
-				if TableLocation.mouse_over_cast_area() and card._can_cast() and can_cast_enough_mana(card):
+#			if (Global.game_table.is_casting() and can_cast_phase(card)) or is_playing: #you can always cast a card to react to another one
+			if can_cast_phase(card) or is_playing: #you can always cast a card to react to another one
+				if TableLocation.mouse_over_cast_area() and card.can_cast() and can_cast_enough_mana(card):
 					tap_mana(card.mana_cost)
-					Global.game_table.queue_cast_card(card)
+					queue_cast_card(card)
 				else:
 					card.holder_node.animate_to_holder()
 			else:
@@ -200,14 +192,52 @@ func can_cast_phase(card):
 	if card.type == card.CardType.INSTANT: #TODO maybe we need to add more types here?
 		return true
 	return false
+func queue_cast_card(card):
+	if cast_queue.empty() or card.type == card.CardType.INSTANT:
+		pass
+	else:
+		return
+	if not cast_queue.empty():
+		cast_queue.front().timer.paused = true
+		
+	cast_queue.push_front(card)
+	card.start_cast_timer(cast_wait_time)
+	yield(card.timer, "timeout")
+	
+	card.cast()
+	cast_queue.pop_front()
+	if not cast_queue.empty():
+		cast_queue.front().timer.paused = false
+	else:
+		card.holder_node.animate_to_holder()
+		emit_signal("cast_finished")
+	
+	var move_to_h_box = false
+	match card.type:
+		card.CardType.LAND:
+			hand_h_box.remove_child(card.holder_node)
+			card.location = CardLocation.MANA
+		card.CardType.CREATURE:
+			card.location = CardLocation.BATTLEFIELD
+			move_to_h_box = true
+		card.CardType.INSTANT:
+			hand_h_box.remove_child(card.holder_node)
+			card.location = CardLocation.GRAVEYARD
+	if move_to_h_box:
+		var tex_global_rect = card.texture_node.get_global_rect()
+		card.holder_node.get_parent().remove_child(card.holder_node)
+		bf_h_box.add_child(card.holder_node)
+		yield(bf_h_box, "sort_children")
+		card.texture_node.rect_global_position = tex_global_rect.position
+		card.texture_node.rect_size = tex_global_rect.size
+		card.holder_node.animate_to_holder()
+
 #Events
 func _card_location_changed(card):
 	if card.location == CardLocation.MANA:
 		emit_signal("mana_changed", get_available_mana())
-
 func _on_FinishTurnButton_pressed():
 	emit_signal("turn_finished")
-
 func _turn_changed(new_val):
 	is_playing = new_val
 	$left_area/FinishTurnButton.disabled = not is_playing

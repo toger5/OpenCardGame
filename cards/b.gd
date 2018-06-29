@@ -1,4 +1,4 @@
-extends "res://card_class/card_creature.gd"
+extends "res://card_class/card_types/card_creature.gd"
 
 func _init():
 	name = "This is a different Monster"

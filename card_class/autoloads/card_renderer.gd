@@ -1,6 +1,6 @@
 extends Node
 
-var card_scn = preload("res://card_class/card.tscn")
+var card_scn = preload("res://card_class/card_creation/card.tscn")
 
 var card_size = Vector2()# setget card_size_checked
 var card_viewports = {}

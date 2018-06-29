@@ -2,7 +2,7 @@
 
 [ext_resource path="res://card_class/holder.gd" type="Script" id=1]
 
-[node name="Panel" type="Panel" index="0"]
+[node name="Control" type="Control" index="0"]
 anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0

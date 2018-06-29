@@ -1,4 +1,4 @@
-extends "res://card_class/card_creature.gd"
+extends "res://card_class/card_base.gd"
 
 func _init():
 	name = "Da INSTNAT Stadt die freude macht"

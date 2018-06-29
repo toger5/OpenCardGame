@@ -2,6 +2,8 @@ extends Object
 
 enum CardType {INSTANT, SORCERY, CREATURE, LAND, ENCHANTMENT, ARTIFACT, PLANESWALKER}
 
+#signals
+signal tapped_changed
 signal casted(card)
 signal location_changed(card)
 
@@ -27,13 +29,12 @@ var holder_node setget ,_holder_node_get
 var player #is added in player_side.gd
 var opponent
 var table
-var deck
 
-#signals
-signal tapped_changed
 
 #hleper variables
 var timer = Timer.new()
+
+
 
 #events
 func _init():
@@ -42,44 +43,30 @@ func _init():
 	for t in ManaType.list:
 		mana_cost[t] = 0
 
-func _cast():
-	casted = true
-	print("card got casted")
-	emit_signal("casted", self)
 func _action_on_card(card):
 	print("action on card: "+ str(card.name))
 	pass
 func _action_on_opponent():
 	print("action on opponent with: "+ str(name))
 	pass
-func _location_changed():
-	pass
-func _can_cast():
-	return true
 func _tapped_changed(new_tap_status):
 	if not new_tap_status == tapped:
 		tapped = new_tap_status
 		emit_signal("tapped_changed")
+	
+func _holder_node_get():
+	if not holder_node:
+		new_holder_node(player.hand_h_box.rect_size.y)
+	return holder_node
 #internal events
 func __location_changed(new_val):
 	location = new_val
 	emit_signal("location_changed", self)
 
-#func _on_drop_to_cast():
-	
-
 #helper functions
-func update_tex():
-	texture_node.texture = card_renderer.get_card_texture(self)
+	#card creation process starts here after holder_node_get
 
-func render_on(tex):
-	tex = card_renderer.get_card_texture(self)
-
-func _holder_node_get():
-	if not holder_node:
-		new_holder_node(player.hand_h_box.rect_size.y)
-	return holder_node
-
+#The texture is created here. populate, renderer, and card tscn are made for this purpose
 func new_holder_node(height):
 	if holder_node:
 		return
@@ -90,7 +77,10 @@ func new_holder_node(height):
 #	holder_node.connect("drag_start", self, "_on_drag")
 #	holder_node.connect("dropped", self, "_on_drop")
 	return holder_node
-
+func update_tex():
+	texture_node.texture = card_renderer.get_card_texture(self)
+func render_on(tex):
+	tex = card_renderer.get_card_texture(self)
 
 #TODO move to some global class
 func hover_card_hand_size():
@@ -103,6 +93,12 @@ func hover_card_top_right_size():
 	return Vector2(y*screen_factor*card_renderer.card_size.aspect(), y*screen_factor)
 
 # card methods
+func can_cast():
+	return true
+func cast():
+	casted = true
+	print("card got casted")
+	emit_signal("casted", self)
 func start_cast_timer(wait_time):
 	VisualServer.canvas_item_set_z_index(texture_node.get_canvas_item(),2)
 	casting = true
@@ -123,3 +119,4 @@ func move_to(h_box):
 	texture_node.rect_global_position = tex_global_rect.position
 	texture_node.rect_size = tex_global_rect.size
 	holder_node.animate_to_holder()
+

@@ -24,11 +24,13 @@ func _ready():
 	connect("mouse_entered", self, "_mouse_entered")
 	connect("mouse_exited", self, "_mouse_exited")
 	card.connect("tapped_changed", self, "animate_tapping")
+	
+	#DO NOT DELETE! for now it just overflows debugger
+#	Global.opponent.bf_node.connect("mouse_entered", self, "_mouse_entered_opponent_bf")
+#	Global.opponent.bf_node.connect("mouse_exited", self, "_mouse_exited_opponent_bf")
 
 func _process(delta):
-#	if not (process_for_drag or process_for_progressbar):
-#		return
-	print("process of card_node aka: the all mighty \"holder\"...  this print is there so we can see if process is runnign although it hsouldnt")
+#	print("process of card_node aka: the all mighty \"holder\"...")
 	if timer:
 		progress.value = 1 - timer.time_left / timer.wait_time
 	if interaction_state == InteractionState.DRAG:
@@ -100,14 +102,14 @@ func _mouse_entered():
 	if card.location == CardLocation.HAND and not card.casting: 
 		animate_card_big()
 	if card.location == CardLocation.BATTLEFIELD:
-		card.player.get_parent().show_card_preview(card)
+		Global.game_table.show_card_preview(card)
 
 func _mouse_exited():
 	interaction_state = InteractionState.NONE
 	if card.location == CardLocation.HAND and not card.casting: 
 		animate_to_holder()
 	if card.location == CardLocation.BATTLEFIELD:
-		card.player.get_parent().hide_card_preview(card)
+		Global.game_table.hide_card_preview(card)
 
 func animate_card_big():
 	var t_trans = Tween.TRANS_EXPO
@@ -117,8 +119,8 @@ func animate_card_big():
 	VisualServer.canvas_item_set_z_index(ct.get_canvas_item(), 4)
 	tween.stop_all()
 	var si = card.hover_card_hand_size()
-	for p in card.player.get_property_list():
-		print(p["name"])
+#	for p in card.player.get_property_list():
+#		print(p["name"])
 	var m_top = rect_size.y/2 - si.y
 	var m_bottom = -rect_size.y/2
 	if card.player.table_side == card.player.TableSide.TOP:

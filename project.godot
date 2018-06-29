@@ -18,8 +18,8 @@ config/icon="res://cards/a.png"
 
 [autoload]
 
-card_renderer="*res://card_class/card_renderer.gd"
-card_cache="*res://card_class/card_cache.gd"
+card_cache="*res://card_class/autoloads/card_cache.gd"
+card_renderer="*res://card_class/autoloads/card_renderer.gd"
 Global="*res://Autoload/Global.gd"
 ManaType="*res://Autoload/ManaType.gd"
 CardLocation="*res://Autoload/CardLocation.gd"
