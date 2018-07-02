@@ -6,8 +6,6 @@ enum location {BOTTOM_BF, BOTTOM_HAND, GRAVEYARD, DECK, TOP_HAND, TOP_BF}
 onready var player = $player
 onready var opponent = $opp
 
-var attack_phase_height = 100
-
 onready var card_preview_tr = get_node("../TextureRect")
 onready var deck = $player/left_area/deck
 
@@ -74,6 +72,7 @@ func indicate_attack_phase(indicate, label_stage = 0):
 				bg_opacity = 0.4
 	inactive_player().show_attack_indicate_label(lbl_opacity, bg_opacity)
 func start_attack_phase():
+	var attack_phase_height = 50
 	if phase == GamePhase.ATTACK:
 		return
 	active_player().indicate_attack_phase(false,0)

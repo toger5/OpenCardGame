@@ -44,10 +44,10 @@ func _process(delta):
 			var OPPONENT_BF = TableLocation.opponent_bf(card.player)
 			
 			if current_table_loc == OPPONENT_BF and not is_indication_label_shown:
-				card.player.indicate_attack_phase(true, 2) #true: indicate with gap, 2: with high contrast label
+				Global.game_table.indicate_attack_phase(true, 2) #true: indicate with gap, 2: with high contrast label
 				is_indication_label_shown = true
 			elif current_table_loc != OPPONENT_BF and is_indication_label_shown:
-				card.player.indicate_attack_phase(true, 1) #true: indicate with gap, 1: for low contrast lable
+				Global.game_table.indicate_attack_phase(true, 1) #true: indicate with gap, 1: for low contrast lable
 				is_indication_label_shown = false
 
 func _enter_tree():
