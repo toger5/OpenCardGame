@@ -18,6 +18,7 @@ var process_for_drag = false
 var process_for_progressbar = false
 signal dropped(card)
 signal drag_start(card)
+signal animate_to_holder_completed
 
 func _ready():
 	set_process(false)
@@ -36,13 +37,12 @@ func _process(delta):
 	if interaction_state == InteractionState.DRAG:
 		drag_offset_factor = max(0,(drag_offset_factor * 0.8) - delta)
 		tex_node.rect_global_position = (get_global_mouse_position() - tex_node.rect_size/2) + drag_offset * drag_offset_factor
-		
+#		tex_node.rect_global_position = tex_node.rect_global_position
 		if card.location == CardLocation.BATTLEFIELD:
 			#check if over opponent area
 			var current_table_loc = TableLocation.mouse_pos()
-			
 			var OPPONENT_BF = TableLocation.opponent_bf(card.player)
-			
+
 			if current_table_loc == OPPONENT_BF and not is_indication_label_shown:
 				Global.game_table.indicate_attack_phase(true, 2) #true: indicate with gap, 2: with high contrast label
 				is_indication_label_shown = true
@@ -74,9 +74,10 @@ func _timeout():
 func _gui_input(event):
 	if event is InputEventMouseButton:
 		if event.pressed and event.button_index == BUTTON_RIGHT:
-			if card.location == CardLocation.BATTLEFIELD:
+			if card.location == CardLocation.BATTLEFIELD or card.location == CardLocation.ATTACK:
 				card.tapped = not card.tapped
 				return
+		
 		if event.pressed and event.button_index == BUTTON_LEFT:
 			interaction_state = InteractionState.DRAG
 			process_for_drag = true
@@ -84,10 +85,9 @@ func _gui_input(event):
 			VisualServer.canvas_item_set_z_index(tex_node.get_canvas_item(),2)
 			drag_offset = tex_node.rect_global_position - (get_global_mouse_position() - (tex_node.rect_size /2))
 			drag_offset_factor = 1
-			tween.stop(tex_node)
-			tween.interpolate_property(tex_node, "rect_size", tex_node.rect_size, Vector2(tex_node.texture.get_width(), tex_node.texture.get_height())*card.player.DRAG_SIZE_HIGHT/tex_node.texture.get_height(), 0.8, Tween.TRANS_LINEAR, Tween.EASE_IN)
-			if card.location == CardLocation.BATTLEFIELD:
-				card.player.indicate_attack_phase(true, 1)
+			animate_card_big_for_dragging()
+			Global.game_table.hide_card_preview(card)
+
 func _input(event):
 	if event is InputEventMouseButton:
 		if not event.pressed and event.button_index == BUTTON_LEFT:
@@ -101,16 +101,24 @@ func _mouse_entered():
 	interaction_state = InteractionState.HOVER
 	if card.location == CardLocation.HAND and not card.casting: 
 		animate_card_big()
-	if card.location == CardLocation.BATTLEFIELD:
+	if card.location == CardLocation.BATTLEFIELD or card.location == CardLocation.ATTACK:
 		Global.game_table.show_card_preview(card)
 
 func _mouse_exited():
 	interaction_state = InteractionState.NONE
 	if card.location == CardLocation.HAND and not card.casting: 
 		animate_to_holder()
-	if card.location == CardLocation.BATTLEFIELD:
+	if card.location == CardLocation.BATTLEFIELD or card.location == CardLocation.ATTACK:
 		Global.game_table.hide_card_preview(card)
-
+		
+func animate_card_big_for_dragging():
+	tween.stop(tex_node)
+	print(tex_node.rect_size)
+#	if card.tapped == false:
+	tween.interpolate_property(tex_node, "rect_size", tex_node.rect_size, Vector2(tex_node.texture.get_height(), tex_node.texture.get_height())*card.player.DRAG_SIZE_HIGHT/tex_node.texture.get_height(), 0.8, Tween.TRANS_LINEAR, Tween.EASE_IN)
+#	else:
+#		tex_node.rect_size = Vector2(tex_node.texture.get_width(), tex_node.texture.get_height())
+#		tween.interpolate_property(tex_node, "rect_size", tex_node.rect_size, Vector2(tex_node.texture.get_height(), tex_node.texture.get_width())*card.player.DRAG_SIZE_HIGHT/tex_node.texture.get_width(), 0.8, Tween.TRANS_LINEAR, Tween.EASE_IN)
 func animate_card_big():
 	var t_trans = Tween.TRANS_EXPO
 	var t_ease = Tween.EASE_OUT
@@ -142,6 +150,7 @@ func animate_to_holder():
 	var t_trans = Tween.TRANS_BOUNCE
 	var t_ease = Tween.EASE_OUT
 	var d = 0.6
+#	print(ct.margin_top)
 	tween.interpolate_property(ct, "margin_top"   , ct.margin_top   ,0, d,t_trans,t_ease)
 	tween.interpolate_property(ct, "margin_left"  , ct.margin_left  ,0, d,t_trans,t_ease)
 	tween.interpolate_property(ct, "margin_right" , ct.margin_right ,0, d,t_trans,t_ease)
@@ -150,6 +159,7 @@ func animate_to_holder():
 #	yield(player.get_tree().create_timer(d*2), "timeout")
 	yield(tween, "tween_completed")
 	VisualServer.canvas_item_set_z_index(ct.get_canvas_item(),0)
+	emit_signal("animate_to_holder_completed")
 	
 func update_holder_size():
 	if get_parent() is HBoxContainer:
@@ -160,20 +170,22 @@ func update_holder_size():
 
 func animate_tapping():
 #	rect_min_size.x += 10
-	if card.location == CardLocation.BATTLEFIELD:
-		var t = 0.5
-		if card.tapped:
-			tween.interpolate_property(self, "rect_min_size:x", rect_min_size.x, tex_node.rect_size.y, t, Tween.TRANS_ELASTIC, Tween.EASE_OUT)
-			yield(tween, "tween_completed")
-			tex_node.set_pivot_offset(rect_size/2)
-			tween.interpolate_property(tex_node, "rect_rotation", 0, 90, t, Tween.TRANS_EXPO, Tween.EASE_OUT)
-		if not card.tapped:
-			tween.interpolate_property(tex_node, "rect_rotation", 90, 0, t, Tween.TRANS_EXPO, Tween.EASE_OUT)
-			yield(tween, "tween_completed")
-			var old_x = rect_size.x
-			update_holder_size()
-			tween.interpolate_property(self, "rect_min_size:x", rect_size.x, rect_min_size.x, t, Tween.TRANS_BOUNCE, Tween.EASE_OUT)
-		tween.start()
+#	tween.stop_all()
+	var t = 0.5
+	if card.tapped:
+		print("tapping: ", rect_min_size.x,",", tex_node.rect_size.y)
+		tween.interpolate_property(self, "rect_min_size:x", rect_min_size.x, tex_node.rect_size.y, t, Tween.TRANS_ELASTIC, Tween.EASE_OUT)
+		yield(tween, "tween_completed")
+		tex_node.set_pivot_offset(rect_size/2)
+		tween.interpolate_property(tex_node, "rect_rotation", 0, 90, t, Tween.TRANS_EXPO, Tween.EASE_OUT)
+	if not card.tapped:
+		tween.interpolate_property(tex_node, "rect_rotation", 90, 0, t, Tween.TRANS_EXPO, Tween.EASE_OUT)
+		yield(tween, "tween_completed")
+		var old_x = rect_size.x
+		update_holder_size()
+		tween.interpolate_property(self, "rect_min_size:x", rect_size.x, rect_min_size.x, t, Tween.TRANS_BOUNCE, Tween.EASE_OUT)
+	tween.start()
 
 func update_set_process():
 	set_process(process_for_drag or process_for_progressbar)
+#	set_process(true)

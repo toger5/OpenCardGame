@@ -18,7 +18,7 @@ var mana_cost = {}#saved as a dict with keys of ManaType
 var is_reaction = false
 
 #staus
-var location = null setget __location_changed#CardLocation 
+var location = null setget _location_changed#CardLocation 
 var tapped = false setget _tapped_changed
 var casted = false
 var casting = false
@@ -59,8 +59,9 @@ func _holder_node_get():
 		new_holder_node(player.hand_h_box.rect_size.y)
 	return holder_node
 #internal events
-func __location_changed(new_val):
+func _location_changed(new_val):
 	location = new_val
+	print("location cahnged")
 	emit_signal("location_changed", self)
 
 #helper functions
@@ -111,7 +112,7 @@ func start_cast_timer(wait_time):
 	casting = false
 	VisualServer.canvas_item_set_z_index(texture_node.get_canvas_item(),0)
 
-func move_to(h_box):
+func move_to(h_box, new_location):
 	var tex_global_rect = texture_node.get_global_rect()
 	holder_node.get_parent().remove_child(holder_node)
 	h_box.add_child(holder_node)
@@ -119,4 +120,8 @@ func move_to(h_box):
 	texture_node.rect_global_position = tex_global_rect.position
 	texture_node.rect_size = tex_global_rect.size
 	holder_node.animate_to_holder()
+	yield(holder_node, "animate_to_holder_completed") 
+	self.location = new_location
+	#Comment to the yields: instead of adding all those yields the "add_to_tween_queue" function
+#	in globals might help, although it doesnt work for now. This is, therefore, temporary and a solution to handle all tweens after one another still might have to be found
 

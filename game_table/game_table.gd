@@ -1,6 +1,5 @@
 extends Control
 
-signal cast_finished
 enum location {BOTTOM_BF, BOTTOM_HAND, GRAVEYARD, DECK, TOP_HAND, TOP_BF}
 
 onready var player = $player
@@ -21,6 +20,10 @@ func is_casting(): return not cast_queue.empty()
 enum GamePhase {DEFAULT, DEFALT, ATTACK, DEFEND, NO_INTERACTION} #NO_INTERACTION is used for mana reload phase + attack execute phase (they should still be short and with fast animations)
 var phase = GamePhase.DEFAULT
 var attack_phase = false
+
+#sgnals
+signal attack_phase_started
+signal attack_phase_ended
 
 func _ready():
 	add_child(tw)
@@ -47,17 +50,18 @@ func show_card_preview(card):
 func hide_card_preview(card):
 	tw.interpolate_property(card_preview_tr, "modulate:a",card_preview_tr.modulate.a, 0, 0.2,Tween.TRANS_LINEAR, Tween.EASE_OUT)
 	tw.start()
-
+	
 #Attack Phase
 func indicate_attack_phase(indicate, label_stage = 0):
 	if attack_phase:
 		return
-	var attack_indicate_height = 20
+	var attack_indicate_height = Dpi.ATTACK_INDICATE_HEIGHT
 	if not indicate:
 		attack_indicate_height = 0
 	for p in [opponent, player]:
 		var spacer = p.attack_phase_spacer
 		var d = 0.17
+#		Global.add_tween_to_queue(spacer, "rect_min_size:y", "different_property_absolute", ["rect_size.y", attack_indicate_height], d, Tween.TRANS_EXPO, Tween.EASE_OUT)
 		tw.interpolate_property(spacer, "rect_min_size:y", spacer.rect_size.y, attack_indicate_height, d, Tween.TRANS_EXPO, Tween.EASE_OUT)
 
 	var bg_opacity = 0
@@ -71,24 +75,25 @@ func indicate_attack_phase(indicate, label_stage = 0):
 				lbl_opacity = 0.6
 				bg_opacity = 0.4
 	inactive_player().show_attack_indicate_label(lbl_opacity, bg_opacity)
+	
 func start_attack_phase():
-	var attack_phase_height = 50
 	if phase == GamePhase.ATTACK:
 		return
-	active_player().indicate_attack_phase(false,0)
+	indicate_attack_phase(false,0)
 	phase = GamePhase.ATTACK
 	for p in [opponent, player]:
 		p.animate_attack(true)
+	yield(player, "attack_anim_complete")
+	emit_signal("attack_phase_started")
 
-		var d = 0.2
-		tw.interpolate_property(p.attack_phase_spacer, "rect_min_size:y", p.attack_phase_spacer.rect_size.y, attack_phase_height, d, Tween.TRANS_EXPO, Tween.EASE_IN)
 func end_attack_phase():
 	if phase != GamePhase.ATTACK: #and phase != GamePhase.NO_INTERACTION: #(I think this is not needed)
 		return
 	phase = GamePhase.DEFAULT
-	active_player().indicate_attack_phase(false,0)
 	for p in [opponent, player]:
-		animate_attack(false)
+		p.animate_attack(false)
+	yield(player, "attack_anim_complete")
+	emit_signal("attack_phase_ended")
 
 #functions to control turns
 func _turn_finished():

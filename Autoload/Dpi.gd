@@ -17,6 +17,9 @@ func _get_player_size(): return Vector2(_get_screen_size().x, _get_screen_size()
 
 
 #SIZE CONSTANTS
+var ATTACK_INDICATE_HEIGHT setget ,_get_attack_indicate_height
+func _get_attack_indicate_height(): return (_get_player_size().y) / 8
+
 var ATTACK_SPACER_HEIGHT setget ,_get_attack_spacer_height
 func _get_attack_spacer_height(): return (_get_player_size().y) / 4 
 

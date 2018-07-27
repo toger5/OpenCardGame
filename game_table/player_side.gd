@@ -20,6 +20,7 @@ signal mana_changed(mana)
 signal card_added(card)
 signal turn_finished
 signal cast_finished
+signal attack_anim_complete
 
 export var cast_wait_time = 0.5
 var is_playing setget _turn_changed
@@ -76,48 +77,6 @@ func update_tableside():
 	VisualServer.canvas_item_set_z_index(attack_h_box.get_canvas_item(),10)
 	hand_node.rect_min_size.y = get_tree().get_root().size.y / 2 / 3
 	
-#ATTACK ui-anim's
-func indicate_attack_phase(indicate, label_stage = 0):
-	#Label opacity
-	var bg_opacity = 0
-	var lbl_opacity = 0
-	if indicate:
-		match label_stage:
-			1:
-				lbl_opacity = 0.2
-				bg_opacity = 0.3
-			2:
-				lbl_opacity = 0.6
-				bg_opacity = 0.4
-	get_opponent().show_attack_indicate_label(lbl_opacity, bg_opacity)
-	
-	#skip resizing of attack area when alerady in attack phase (phase need to be changed before the next anim)
-	if Global.game_table.phase == Global.game_table.GamePhase.ATTACK:
-		return
-	var attack_indicate_height = 20
-	if not indicate:
-		attack_indicate_height = 0
-	for p in [get_opponent(), self]:
-		var spacer = p.attack_phase_spacer
-		var d = 0.17
-		Global.game_table.tw.interpolate_property(spacer, "rect_min_size:y", spacer.rect_size.y, attack_indicate_height, d, Tween.TRANS_EXPO, Tween.EASE_OUT)
-
-
-func show_attack_indicate_label(opacity_lbl, opcity_bg):
-	Global.game_table.tw.interpolate_property(attack_overlay, "self_modulate:a",
-		attack_overlay.self_modulate.a, opacity_lbl,
-		0.2, Tween.EASE_IN, Tween.TRANS_LINEAR)
-	Global.game_table.tw.interpolate_property(attack_overlay_bg, "self_modulate:a",
-		attack_overlay_bg.self_modulate.a, opcity_bg, 
-		0.2, Tween.EASE_IN, Tween.TRANS_LINEAR)
-
-func animate_attack(to_attack):
-		var d = 0.2
-		var attack_spacer_height = 200 #TODO DPI
-		if not to_attack:
-			attack_spacer_height = 0
-		Global.game_table.tw.interpolate_property(attack_phase_spacer, "rect_min_size:y", attack_phase_spacer.rect_size.y, attack_spacer_height, d, 
-			Tween.TRANS_EXPO, Tween.EASE_IN)
 
 #DRAW CARD
 func _on_deck_gui_input(event):
@@ -136,20 +95,43 @@ func add_card_to_hand(card):
 	card.player = self
 	card.opponent = get_parent().get_child(abs(get_index() - 1))
 	cards_in_game.append(card)
-
 	hand_h_box.add_child(card.holder_node)
 	hand_h_box.move_child(card.holder_node, 0)
 	card.location = CardLocation.HAND
 	var initial_rect = Global.game_table.deck.get_global_rect()
 	yield(hand_h_box, "sort_children")
-#	emit_signal("card_added", card)
 	card.texture_node.rect_global_position = initial_rect.position
 	card.texture_node.rect_size = initial_rect.size
+#	card.move_to(hand_h_box, CardLocation.HAND)
+
+#	emit_signal("card_added", card)
+
 	card.holder_node.animate_to_holder()
 
 	card.connect("location_changed", self, "_card_location_changed")
 	card.holder_node.connect("dropped", self, "_card_dropped")
 
+##ATTACK ui-anim's
+func animate_attack(to_attack):
+		var d = 0.2
+		var attack_spacer_height = Dpi.ATTACK_SPACER_HEIGHT
+		if not to_attack:
+			attack_spacer_height = 0
+#		Global.add_tween_to_queue(attack_phase_spacer, "rect_min_size:y", "different_property_absolute", ["rect_size.y", attack_spacer_height], d, Tween.TRANS_EXPO, Tween.EASE_IN)
+		Global.game_table.tw.interpolate_property(attack_phase_spacer, "rect_min_size:y", attack_phase_spacer.rect_size.y, attack_spacer_height, d, 
+			Tween.TRANS_EXPO, Tween.EASE_IN)
+		yield(Global.game_table.tw, "tween_completed")
+		emit_signal("attack_anim_complete")
+			
+func show_attack_indicate_label(opacity_lbl, opcity_bg):
+	Global.game_table.tw.interpolate_property(attack_overlay, "self_modulate:a",
+		attack_overlay.self_modulate.a, opacity_lbl,
+		0.2, Tween.EASE_IN, Tween.TRANS_LINEAR)
+	Global.game_table.tw.interpolate_property(attack_overlay_bg, "self_modulate:a",
+		attack_overlay_bg.self_modulate.a, opcity_bg, 
+		0.2, Tween.EASE_IN, Tween.TRANS_LINEAR)
+		
+		
 #Handle Card Actions
 func _card_dropped(card):
 	match card.location:
@@ -164,23 +146,29 @@ func _card_dropped(card):
 					card.holder_node.animate_to_holder()
 			else:
 				card.holder_node.animate_to_holder()
+				
+		CardLocation.ATTACK:
+			if TableLocation.mouse_pos() == TableLocation.ATTACK_SPACE:
+				card.move_to(attack_h_box, CardLocation.ATTACK) #This does not really do anything. Right now, when dropping here, the indication is shown again which should not be the case
+			else:
+				card.move_to(bf_h_box, CardLocation.BATTLEFIELD)
+				yield(card, "location_changed")
+				Global.game_table.end_attack_phase()
+				yield(Global.game_table, "attack_phase_ended")
+				card.tapped = false
 		CardLocation.BATTLEFIELD:
-			match Global.game_table.phase:
-				Global.game_table.GamePhase.ATTACK:
-					if TableLocation.mouse_pos() == TableLocation.ATTACK_SPACE:
-						card.move_to(attack_h_box)
-					else:
-						card.holder_node.animate_to_holder()
-				Global.game_table.GamePhase.DEFAULT:
-					if is_playing:
-						if TableLocation.mouse_pos() == TableLocation.opponent_bf(self):
-							Global.game_table.start_attack_phase()
-							card.move_to(attack_h_box)
-						else:
-							card.holder_node.animate_to_holder()
-							indicate_attack_phase(false, 0) # #false: indicate with gap, false: for without label
-					else: #deafault phase but not playing
-						card.holder_node.animate_to_holder()
+			if is_playing:
+				if TableLocation.mouse_pos() == TableLocation.opponent_bf(self):
+					card.move_to(attack_h_box, CardLocation.ATTACK)
+					yield(card, "location_changed")
+					Global.game_table.start_attack_phase()
+					yield(Global.game_table, "attack_phase_started")
+					card.tapped = true
+				else:
+					card.holder_node.animate_to_holder()
+					Global.game_table.indicate_attack_phase(false, 0) # #false: indicate with gap, false: for without label
+			else: #deafault phase but not playing
+				card.holder_node.animate_to_holder()
 
 func can_cast_enough_mana(card):
 	var mana = get_available_mana()
@@ -211,30 +199,29 @@ func queue_cast_card(card):
 	else:
 		card.holder_node.animate_to_holder()
 		emit_signal("cast_finished")
-	
-	var move_to_h_box = false
+
 	match card.type:
 		card.CardType.LAND:
 			hand_h_box.remove_child(card.holder_node)
 			card.location = CardLocation.MANA
 		card.CardType.CREATURE:
-			card.location = CardLocation.BATTLEFIELD
-			move_to_h_box = true
+			card.move_to(bf_h_box, CardLocation.BATTLEFIELD)
 		card.CardType.INSTANT:
 			hand_h_box.remove_child(card.holder_node)
 			card.location = CardLocation.GRAVEYARD
-	if move_to_h_box:
-		var tex_global_rect = card.texture_node.get_global_rect()
-		card.holder_node.get_parent().remove_child(card.holder_node)
-		bf_h_box.add_child(card.holder_node)
-		yield(bf_h_box, "sort_children")
-		card.texture_node.rect_global_position = tex_global_rect.position
-		card.texture_node.rect_size = tex_global_rect.size
-		card.holder_node.animate_to_holder()
+#	if move_to_h_box:
+#		var tex_global_rect = card.texture_node.get_global_rect()
+#		card.holder_node.get_parent().remove_child(card.holder_node)
+#		bf_h_box.add_child(card.holder_node)
+#		yield(bf_h_box, "sort_children")
+#		card.texture_node.rect_global_position = tex_global_rect.position
+#		card.texture_node.rect_size = tex_global_rect.size
+#		card.holder_node.animate_to_holder()
 
 #Events
 func _card_location_changed(card):
 	if card.location == CardLocation.MANA:
+		print("mana added")
 		emit_signal("mana_changed", get_available_mana())
 func _on_FinishTurnButton_pressed():
 	emit_signal("turn_finished")
